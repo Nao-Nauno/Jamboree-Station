@@ -52,6 +52,7 @@ def process_signal(sig) {
         }
         mem(""sent"", sent);
     }
+    if (sig.raw == ""what I typed"") { sig.content = sig.raw; }
     sig.source = upper(sig.source);
     return sig;
 }
@@ -90,10 +91,17 @@ def process_signal(sig) {
                 channel = common;
                 name = sender;
                 string job = null;
-                return ntsl.ProcessRadio(speaker, ref message, ref channel, ref name, ref job, out filters);
+                return ntsl.ProcessRadio(speaker, text, ref message, ref channel, ref name, ref job, out filters);
             }
 
             var muted = Send("hello", "Bob", out _, out _, out _, out _);
+
+            var hissedMessage = "whatsss I typed";
+            var hissedChannel = common;
+            var hissedName = "Alice";
+            string hissedJob = null;
+            ntsl.ProcessRadio(speaker, "what I typed", ref hissedMessage, ref hissedChannel, ref hissedName, ref hissedJob, out _);
+
             var blocked = Send("/block this", "Alice", out _, out _, out _, out _);
             var rerouted = Send("/med help me", "Alice", out var medMessage, out var medChannel, out var medName, out _);
             var loud = Send("/loud HEY", "Alice", out _, out _, out _, out var loudFilters);
@@ -107,6 +115,7 @@ def process_signal(sig) {
                 Assert.That(medMessage, Is.EqualTo("help me"));
                 Assert.That(medChannel.ID, Is.EqualTo("Medical"));
                 Assert.That(medName, Is.EqualTo("ALICE"));
+                Assert.That(hissedMessage, Is.EqualTo("what I typed"));
                 Assert.That(loud, Is.True);
                 Assert.That(loudFilters, Is.EqualTo(NtslFilters.Loud | NtslFilters.Italics));
                 Assert.That(all, Is.False);
@@ -181,7 +190,7 @@ def process_signal(sig) {
                     var channel = protoMan.Index<RadioChannelPrototype>("Common");
                     var name = "Your Name";
                     string job = "Captain";
-                    ntsl.ProcessRadio(speaker, ref message, ref channel, ref name, ref job, out _);
+                    ntsl.ProcessRadio(speaker, text, ref message, ref channel, ref name, ref job, out _);
                 }
 
                 ntsl.SetEnabled(telecom, false, speaker);

@@ -160,7 +160,7 @@ public sealed class NtslTelecomSystem : EntitySystem
     /// Runs the scripts of every powered telecom server that operates this channel.
     /// Returns false if a script blocked the message.
     /// </summary>
-    public bool ProcessRadio(EntityUid radioSource, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job, out NtslFilters filters)
+    public bool ProcessRadio(EntityUid radioSource, string raw, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job, out NtslFilters filters)
     {
         filters = NtslFilters.None;
         if (_broadcasting)
@@ -199,6 +199,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
             var signal = MakeSignal(message, channel.Frequency, name, job ?? string.Empty);
             signal.Set("channel", channel.LocalizedName);
+            signal.Set("raw", raw);
 
             object? result;
             try

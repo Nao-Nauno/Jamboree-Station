@@ -106,7 +106,7 @@ public sealed partial class RadioSystem : EntitySystem
             && component.Channels.Contains(args.Channel.ID)
             && _whitelist.IsWhitelistPassOrNull(args.Channel.SendWhitelist, uid)) // Goobstation - Whitelisted radio channels
         {
-            SendRadioMessage(uid, args.Message, args.Channel, uid, args.Language); // Einstein Engines - Language
+            SendRadioMessage(uid, args.Message, args.Channel, uid, args.Language, rawMessage: args.RawMessage); // Einstein Engines - Language // Jamboree~ NTSL sig.raw
             args.Channel = null; // prevent duplicate messages from other listeners.
         }
     }
@@ -142,9 +142,10 @@ public sealed partial class RadioSystem : EntitySystem
         ProtoId<RadioChannelPrototype> channel,
         EntityUid radioSource,
         LanguagePrototype? language = null,
-        bool escapeMarkup = true)
+        bool escapeMarkup = true,
+        string? rawMessage = null) // Jamboree~ NTSL sig.raw
     {
-        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, escapeMarkup: escapeMarkup, language: language); // Einstein Engines - Language
+        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, escapeMarkup: escapeMarkup, language: language, rawMessage: rawMessage); // Einstein Engines - Language // Jamboree~ rawMessage
     }
 
     /// <summary>
@@ -158,7 +159,8 @@ public sealed partial class RadioSystem : EntitySystem
         RadioChannelPrototype channel,
         EntityUid radioSource,
         LanguagePrototype? language = null,
-        bool escapeMarkup = true)
+        bool escapeMarkup = true,
+        string? rawMessage = null) // Jamboree~ NTSL sig.raw
     {
         // Einstein Engines - Language begin
         if (language == null)
@@ -188,7 +190,7 @@ public sealed partial class RadioSystem : EntitySystem
         // Jamboree~ NTSL telecom scripts can rewrite, reroute or block the message
         var scriptedMessage = message;
         var scriptedName = evt.VoiceName;
-        if (!_ntsl.ProcessRadio(radioSource, ref scriptedMessage, ref channel, ref scriptedName, ref jobName, out var ntslFilters))
+        if (!_ntsl.ProcessRadio(radioSource, rawMessage ?? message, ref scriptedMessage, ref channel, ref scriptedName, ref jobName, out var ntslFilters))
         {
             _messages.Remove(message);
             return;

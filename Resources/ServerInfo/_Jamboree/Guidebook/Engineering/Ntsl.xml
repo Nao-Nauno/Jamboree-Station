@@ -21,7 +21,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
   ## The basics
   Every message runs the function [mono]process_signal[/mono]. It receives the message as [mono]sig[/mono]:
-  - [mono]sig.content[/mono]: the text of the message.
+  - [mono]sig.content[/mono]: the text of the message, as spoken.
+  - [mono]sig.raw[/mono]: the text exactly as it was typed, before accents.
   - [mono]sig.source[/mono]: the name of the speaker.
   - [mono]sig.job[/mono]: the speaker's job.
   - [mono]sig.freq[/mono]: the channel frequency. Set it to move the message to another channel on the same server.
