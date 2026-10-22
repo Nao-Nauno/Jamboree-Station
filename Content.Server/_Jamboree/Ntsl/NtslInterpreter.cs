@@ -282,14 +282,32 @@ public sealed partial class NtslInterpreter
 
     private object? EvaluateCall(NtslCallExpr call, NtslScope scope)
     {
-        var callee = Evaluate(call.Callee, scope);
-        var args = new List<object?>(call.Args.Count);
-        foreach (var arg in call.Args)
+        object? callee;
+        if (call.Callee is NtslMemberExpr member)
         {
-            args.Add(Evaluate(arg, scope));
+            var target = Evaluate(member.Target, scope);
+            if (target is NtslList list && !list.Values.ContainsKey(member.Name) && IsListMethod(member.Name))
+                return CallListMethod(list, member.Name, EvaluateArgs(call.Args, scope), call.Line);
+
+            callee = GetMember(target, member.Name, member.Line);
+        }
+        else
+        {
+            callee = Evaluate(call.Callee, scope);
         }
 
-        return CallValue(callee, args, call.Line);
+        return CallValue(callee, EvaluateArgs(call.Args, scope), call.Line);
+    }
+
+    private List<object?> EvaluateArgs(List<NtslExpr> exprs, NtslScope scope)
+    {
+        var args = new List<object?>(exprs.Count);
+        foreach (var expr in exprs)
+        {
+            args.Add(Evaluate(expr, scope));
+        }
+
+        return args;
     }
 
     private object? CallValue(object? callee, List<object?> args, int line)

@@ -175,6 +175,7 @@ public sealed class NtslInterpreterTest
             Assert.That(Error("def get() { return 1 / 0; }"), Is.EqualTo("ntsl-error-divide-by-zero"));
             Assert.That(Error("def get() { return nope; }"), Is.EqualTo("ntsl-error-unknown-name"));
             Assert.That(Error("def get() { l = list(1); l[5] = 2; }"), Is.EqualTo("ntsl-error-index-out-of-range"));
+            Assert.That(Error("def get() { l = list(1); l.Insert(9, 2); }"), Is.EqualTo("ntsl-error-index-out-of-range"));
             Assert.That(Error("x = ;"), Is.EqualTo("ntsl-error-expected-expression"));
             Assert.That(Error("if (a) { b = 1;"), Is.EqualTo("ntsl-error-unexpected-end"));
             Assert.That(Error("1 = 2;"), Is.EqualTo("ntsl-error-invalid-assignment"));
@@ -187,6 +188,21 @@ public sealed class NtslInterpreterTest
     public void ShortCircuit()
     {
         Assert.That(Run("def boom() { return 1 / 0; } def get() { return 0 && boom(); }"), Is.EqualTo("0"));
+    }
+
+    [Test]
+    [TestCase("return l.Find(\"b\");", "2")]
+    [TestCase("return l.Join(\"-\");", "a-b-c-d")]
+    [TestCase("return l.Copy(2, 4).Join(\"\");", "bc")]
+    [TestCase("l.Cut(1, 3); return l.Join(\"\");", "cd")]
+    [TestCase("l.Add(\"e\", list(\"f\", \"g\")); return l.Join(\"\");", "abcdefg")]
+    [TestCase("l.Remove(\"b\", \"x\"); return l.Join(\"\");", "acd")]
+    [TestCase("l.Insert(2, \"x\", \"y\"); return l.Join(\"\");", "axybcd")]
+    [TestCase("l.Swap(1, 4); return l.Join(\"\");", "dbca")]
+    [TestCase("return l.find(\"c\");", "3")]
+    public void ListMethods(string body, string expected)
+    {
+        Assert.That(Run($"def get() {{ l = list(\"a\", \"b\", \"c\", \"d\"); {body} }}"), Is.EqualTo(expected));
     }
 
     [Test]
