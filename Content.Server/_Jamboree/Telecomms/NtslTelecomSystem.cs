@@ -170,6 +170,9 @@ public sealed class NtslTelecomSystem : EntitySystem
         if (_servers.Count == 0)
             return true;
 
+        // Several servers can carry the same channel
+        _servers.Sort((a, b) => a.Owner.Id.CompareTo(b.Owner.Id));
+
         foreach (var server in _servers)
         {
             // TODO
