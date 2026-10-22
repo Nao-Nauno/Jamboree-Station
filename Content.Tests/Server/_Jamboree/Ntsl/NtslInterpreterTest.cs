@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.Collections.Generic;
 using Content.Server._Jamboree.Ntsl;
 using NUnit.Framework;
 
@@ -214,5 +215,39 @@ public sealed class NtslInterpreterTest
     public void MissingIndexIsNull(string body, string expected)
     {
         Assert.That(Run($"def get() {{ l = list(1); {body} }}"), Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestCase("return repeat(\"HONK! \", 3);", "HONK! HONK! HONK! ")]
+    [TestCase("return reverse(\"abc\");", "cba")]
+    [TestCase("return reverse(list(1, 2, 3)).Join(\",\");", "3,2,1")]
+    [TestCase("return proper(\"hello there\");", "Hello there")]
+    [TestCase("return round(log(100, 10));", "2")]
+    [TestCase("return round(log(E));", "1")]
+    [TestCase("return round(sin(90));", "1")]
+    [TestCase("return round(acos(0));", "90")]
+    [TestCase("return clamp(5, 0, 3) + clamp(-5);", "2")]
+    [TestCase("return tostring(inrange(2, 1, 3)) + inrange(5, 1, 3);", "10")]
+    [TestCase("return NORTH + SOUTH + EAST + WEST;", "15")]
+    [TestCase("return tostring(0.1 + 0.2);", "0.3")]
+    [TestCase("return 1 / 3;", "0.333333")]
+    public void ExtraBuiltins(string body, string expected)
+    {
+        Assert.That(Run($"def get() {{ {body} }}"), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void RandWithOneArgument()
+    {
+        var interpreter = NtslInterpreter.Compile("def get() { return rand(3); }");
+        interpreter.Run();
+
+        var seen = new HashSet<string>();
+        for (var i = 0; i < 200; i++)
+        {
+            seen.Add(NtslInterpreter.ToText(interpreter.Call("get")));
+        }
+
+        Assert.That(seen, Is.EquivalentTo(new[] { "0", "1", "2", "3" }));
     }
 }

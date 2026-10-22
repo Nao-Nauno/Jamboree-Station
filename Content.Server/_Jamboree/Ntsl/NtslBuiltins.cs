@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace Content.Server._Jamboree.Ntsl;
 
@@ -22,6 +23,13 @@ public sealed partial class NtslInterpreter
         _builtins.Declare("FALSE", 0.0);
         _builtins.Declare("null", null);
         _builtins.Declare("PI", Math.PI);
+        _builtins.Declare("E", Math.E);
+        _builtins.Declare("SQRT2", Math.Sqrt(2));
+        _builtins.Declare("SQURT2", Math.Sqrt(2));
+        _builtins.Declare("NORTH", 1.0);
+        _builtins.Declare("SOUTH", 2.0);
+        _builtins.Declare("EAST", 4.0);
+        _builtins.Declare("WEST", 8.0);
 
         Register("length", Length);
         Register("lower", (args, _) => ToText(Arg(args, 0)).ToLowerInvariant());
@@ -33,6 +41,9 @@ public sealed partial class NtslInterpreter
         Register("replace", Replace);
         Register("explode", Explode);
         Register("implode", Implode);
+        Register("repeat", Repeat);
+        Register("reverse", Reverse);
+        Register("proper", Proper);
 
         Register("abs", (args, line) => Math.Abs(ToNumber(Arg(args, 0), line)));
         Register("round", (args, line) => Math.Round(ToNumber(Arg(args, 0), line), MidpointRounding.AwayFromZero));
@@ -41,6 +52,15 @@ public sealed partial class NtslInterpreter
         Register("sqrt", (args, line) => Math.Sqrt(ToNumber(Arg(args, 0), line)));
         Register("min", (args, line) => Extreme(args, line, Math.Min));
         Register("max", (args, line) => Extreme(args, line, Math.Max));
+        Register("log", Log);
+        Register("sin", (args, line) => Math.Sin(ToRadians(Arg(args, 0), line)));
+        Register("cos", (args, line) => Math.Cos(ToRadians(Arg(args, 0), line)));
+        Register("tan", (args, line) => Math.Tan(ToRadians(Arg(args, 0), line)));
+        Register("asin", (args, line) => Math.Asin(ToNumber(Arg(args, 0), line)) * 180 / Math.PI);
+        Register("acos", (args, line) => Math.Acos(ToNumber(Arg(args, 0), line)) * 180 / Math.PI);
+        Register("atan", (args, line) => Math.Atan(ToNumber(Arg(args, 0), line)) * 180 / Math.PI);
+        Register("clamp", Clamp);
+        Register("inrange", InRangeBuiltin);
 
         Register("prob", (args, line) => _random.NextDouble() * 100 < ToNumber(Arg(args, 0), line) ? 1.0 : 0.0);
         Register("rand", Rand);
@@ -122,6 +142,75 @@ public sealed partial class NtslInterpreter
         return string.Join(ToText(Arg(args, 1)), list.Items.Select(ToText));
     }
 
+    private static object? Repeat(List<object?> args, int line)
+    {
+        var text = ToText(Arg(args, 0));
+        var times = Math.Clamp(ToNumber(Arg(args, 1), line), 0, MaxStringLength);
+        if (text.Length == 0)
+            return string.Empty;
+
+        var result = new StringBuilder();
+        for (var i = 0; i < times && result.Length < MaxStringLength; i++)
+        {
+            result.Append(text);
+        }
+
+        return result.ToString();
+    }
+
+    private static object? Reverse(List<object?> args, int line)
+    {
+        if (Arg(args, 0) is NtslList list)
+        {
+            var reversed = list.Copy();
+            reversed.Items.Reverse();
+            return reversed;
+        }
+
+        var chars = ToText(Arg(args, 0)).ToCharArray();
+        Array.Reverse(chars);
+        return new string(chars);
+    }
+
+    private static object? Proper(List<object?> args, int line)
+    {
+        var text = ToText(Arg(args, 0));
+        return text.Length == 0 ? text : char.ToUpperInvariant(text[0]) + text[1..];
+    }
+
+    private static object? Log(List<object?> args, int line)
+    {
+        var value = ToNumber(Arg(args, 0), line);
+        return args.Count > 1 && args[1] != null
+            ? Math.Log(value, ToNumber(args[1], line))
+            : Math.Log(value);
+    }
+
+    private static double ToRadians(object? value, int line)
+    {
+        return ToNumber(value, line) * Math.PI / 180;
+    }
+
+    private static (double Value, double Low, double High) GetBounds(List<object?> args, int line)
+    {
+        var value = ToNumber(Arg(args, 0), line);
+        var low = args.Count > 1 && args[1] != null ? ToNumber(args[1], line) : -1;
+        var high = args.Count > 2 && args[2] != null ? ToNumber(args[2], line) : 1;
+        return low <= high ? (value, low, high) : (value, high, low);
+    }
+
+    private static object? Clamp(List<object?> args, int line)
+    {
+        var (value, low, high) = GetBounds(args, line);
+        return Math.Clamp(value, low, high);
+    }
+
+    private static object? InRangeBuiltin(List<object?> args, int line)
+    {
+        var (value, low, high) = GetBounds(args, line);
+        return value >= low && value <= high ? 1.0 : 0.0;
+    }
+
     private static object? Extreme(List<object?> args, int line, Func<double, double, double> choose)
     {
         var values = args.Count == 1 && args[0] is NtslList list ? list.Items : args;
@@ -139,11 +228,11 @@ public sealed partial class NtslInterpreter
 
     private object? Rand(List<object?> args, int line)
     {
-        if (args.Count < 2)
+        if (args.Count == 0)
             return _random.NextDouble();
 
-        var low = (long) ToNumber(args[0], line);
-        var high = (long) ToNumber(args[1], line);
+        var low = args.Count == 1 ? 0 : (long) ToNumber(args[0], line);
+        var high = (long) ToNumber(args[args.Count == 1 ? 0 : 1], line);
         if (high < low)
             (low, high) = (high, low);
 

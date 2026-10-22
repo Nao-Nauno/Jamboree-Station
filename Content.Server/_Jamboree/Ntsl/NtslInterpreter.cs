@@ -539,7 +539,7 @@ public sealed partial class NtslInterpreter
         return value switch
         {
             null => string.Empty,
-            double number => number.ToString(CultureInfo.InvariantCulture),
+            double number => Math.Round(number, 6).ToString(CultureInfo.InvariantCulture),
             string text => text,
             NtslList => "[list]",
             _ => "[function]",
