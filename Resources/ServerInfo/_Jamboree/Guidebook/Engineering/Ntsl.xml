@@ -63,10 +63,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   ## Filters
   Put styles in [mono]sig.filters[/mono], for example [mono]sig.filters = list(filter_types.loud, filter_types.robot);[/mono]
   - [mono]filter_types.robot[/mono] ("robot"): monospace robot text.
-  - [mono]filter_types.loud[/mono] ("yell"): bigger text.
+  - [mono]filter_types.loud[/mono] ("yell"): bold text, like shouting.
   - [mono]filter_types.emphasis[/mono] ("italics"): italic text.
   - [mono]filter_types.wacky[/mono] ("sans", or "clown"): comic sans.
-  - [mono]filter_types.commanding[/mono] ("command_headset"): bold text.
+  - [mono]filter_types.commanding[/mono] ("command_headset"): bold and a little bigger.
+  - Robot and wacky text turn bold too when you add loud or commanding.
 
   ## Limits
   Each message may run at most 900 statements, 100 rounds per loop and 16 nested function calls. Text is cut at 1024 characters and lists at 256 items. When a script breaks a limit or hits an error, the message goes through unchanged and the error appears in the console's log.

@@ -120,7 +120,9 @@ def process_signal(sig) {
                 Assert.That(loudFilters, Is.EqualTo(NtslFilters.Loud | NtslFilters.Italics));
                 Assert.That(all, Is.False);
                 Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Memory["sent"], Is.EqualTo(8.0));
-                Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Italics), Is.EqualTo($"[font size={NtslTelecomSystem.LoudFontSize}][italic]hi[/italic][/font]"));
+                Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Italics), Is.EqualTo("[bolditalic]hi[/bolditalic]"));
+                Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Robot), Is.EqualTo("[font=\"MonospaceBold\"]hi[/font]"));
+                Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Commanding), Is.EqualTo($"[font size={NtslTelecomSystem.CommandingFontSize}][bold]hi[/bold][/font]"));
             });
         });
 

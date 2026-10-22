@@ -30,7 +30,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
     public const string EntryFunction = "process_signal";
     public const int MaxBroadcastsPerRun = 10;
-    public const int LoudFontSize = 16;
+    public const int CommandingFontSize = 14;
     public const int MaxMemoryKeys = 500;
     public const int MaxLogEntries = 20;
     public const int MaxNameLength = 32;
@@ -51,7 +51,7 @@ public sealed class NtslTelecomSystem : EntitySystem
         ["italics"] = NtslFilters.Italics,
         ["sans"] = NtslFilters.Sans,
         ["clown"] = NtslFilters.Sans,
-        ["command_headset"] = NtslFilters.Bold,
+        ["command_headset"] = NtslFilters.Commanding,
     };
 
     public override void Initialize()
@@ -368,20 +368,27 @@ public sealed class NtslTelecomSystem : EntitySystem
     /// </summary>
     public static string ApplyFilters(string content, NtslFilters filters)
     {
-        if ((filters & NtslFilters.Italics) != 0)
-            content = $"[italic]{content}[/italic]";
+        if (filters == NtslFilters.None)
+            return content;
 
-        if ((filters & NtslFilters.Bold) != 0)
-            content = $"[bold]{content}[/bold]";
-
-        if ((filters & NtslFilters.Sans) != 0)
-            content = $"[font=\"LDFComicSans\"]{content}[/font]";
+        // Like SS13^^ a yell is bold.
+        var bold = (filters & (NtslFilters.Loud | NtslFilters.Commanding)) != 0;
+        var italic = (filters & NtslFilters.Italics) != 0;
 
         if ((filters & NtslFilters.Robot) != 0)
-            content = $"[font=\"Monospace\"]{content}[/font]";
+            content = $"[font=\"{(bold ? "MonospaceBold" : "Monospace")}\"]{content}[/font]";
+        else if ((filters & NtslFilters.Sans) != 0)
+            content = $"[font=\"{(bold ? "LDFComicSansBold" : "LDFComicSans")}\"]{content}[/font]";
+        else if (bold && italic)
+            content = $"[bolditalic]{content}[/bolditalic]";
+        else if (bold)
+            content = $"[bold]{content}[/bold]";
+        else if (italic)
+            content = $"[italic]{content}[/italic]";
 
-        if ((filters & NtslFilters.Loud) != 0)
-            content = $"[font size={LoudFontSize}]{content}[/font]";
+        // Only the command voice grows, and only a little, like some species languages already do.
+        if ((filters & NtslFilters.Commanding) != 0)
+            content = $"[font size={CommandingFontSize}]{content}[/font]";
 
         return content;
     }
@@ -471,5 +478,5 @@ public enum NtslFilters : byte
     Loud = 1 << 1,
     Italics = 1 << 2,
     Sans = 1 << 3,
-    Bold = 1 << 4,
+    Commanding = 1 << 4,
 }
