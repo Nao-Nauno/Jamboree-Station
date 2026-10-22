@@ -196,7 +196,11 @@ public sealed class NtslTelecomSystem : EntitySystem
                 continue;
 
             if (!NtslInterpreter.IsTrue(output.Get("pass")))
+            {
+                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+                    $"NTSL script on {ToPrettyString(server.Owner):server} blocked a radio message from {name} via {ToPrettyString(radioSource):entity} on {channel.LocalizedName}: {message}");
                 return false;
+            }
 
             message = CleanText(NtslInterpreter.ToText(output.Get("content")), NtslInterpreter.MaxStringLength, "*beep*");
             name = CleanText(NtslInterpreter.ToText(output.Get("source")), MaxNameLength, name);
