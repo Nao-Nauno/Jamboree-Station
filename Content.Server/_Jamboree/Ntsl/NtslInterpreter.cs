@@ -58,6 +58,11 @@ public sealed partial class NtslInterpreter
         _builtins.Declare(name, function);
     }
 
+    public void Define(string name, object? value)
+    {
+        _builtins.Declare(name, value);
+    }
+
     public void Run()
     {
         BeginRun();

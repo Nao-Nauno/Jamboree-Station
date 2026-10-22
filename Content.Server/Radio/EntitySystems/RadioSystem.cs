@@ -65,6 +65,7 @@ using Content.Shared.Chat.RadioIconsEvents; // Goobstation
 using Content.Shared.Whitelist; // Goobstation
 using Content.Shared.StatusIcon; // Goobstation
 using Content.Goobstation.Shared.Radio; // Goobstation
+using Content.Server._Jamboree.Telecomms; // Jamboree~ NTSL telecom scripts
 
 namespace Content.Server.Radio.EntitySystems;
 
@@ -82,6 +83,7 @@ public sealed partial class RadioSystem : EntitySystem
     [Dependency] private readonly RadioJobIconSystem _radioIconSystem = default!; // Goobstation - radio icons
     [Dependency] private readonly LanguageSystem _language = default!; // Einstein Engines - Language
     [Dependency] private readonly EntityWhitelistSystem _whitelist = default!; // Goobstation - Whitelisted radio channels
+    [Dependency] private readonly NtslTelecomSystem _ntsl = default!; // Jamboree~ NTSL telecom scripts
 
     // set used to prevent radio feedback loops.
     private readonly HashSet<string> _messages = new();
@@ -182,6 +184,25 @@ public sealed partial class RadioSystem : EntitySystem
             jobIcon = iconEvent.JobIcon;
             jobName = iconEvent.JobName;
         }
+
+        // Jamboree~ NTSL telecom scripts can rewrite, reroute or block the message
+        var scriptedMessage = message;
+        var scriptedName = evt.VoiceName;
+        if (!_ntsl.ProcessRadio(radioSource, ref scriptedMessage, ref channel, ref scriptedName, ref jobName))
+        {
+            _messages.Remove(message);
+            return;
+        }
+
+        evt.VoiceName = scriptedName;
+        if (scriptedMessage != message)
+        {
+            _messages.Remove(message);
+            message = scriptedMessage;
+            if (!_messages.Add(message))
+                return;
+        }
+        // Jamboree~ end
 
         var name = evt.VoiceName;
         name = FormattedMessage.EscapeText(name);

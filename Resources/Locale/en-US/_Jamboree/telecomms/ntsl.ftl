@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 nao-nauno <desk.nao@gmail.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+## Script errors
+
+ntsl-error-at-line = Line {$line}: {$error}
+ntsl-error-unclosed-comment = This /* comment is never closed with */.
+ntsl-error-unclosed-string = This text is missing its closing quote.
+ntsl-error-unexpected-character = '{$character}' can't be used here.
+ntsl-error-unexpected-end = The code ended too early. Is a {"}"} or ; missing?
+ntsl-error-expected-symbol = Expected '{$symbol}' but found '{$found}'.
+ntsl-error-expected-name = Expected a name but found '{$found}'.
+ntsl-error-expected-expression = Expected a value but found '{$found}'.
+ntsl-error-invalid-assignment = Only variables, list items and fields can be assigned to.
+ntsl-error-too-deep = The code is nested too deeply...
+ntsl-error-code-too-long = Sorry! Scripts can be at most {$max} characters long.
+ntsl-error-too-many-statements = The script ran more than {$max} statements and was stopped.
+ntsl-error-too-many-loops = A loop ran more than {$max} times and was stopped.
+ntsl-error-too-much-recursion = Functions called each other more than {$max} levels deep.
+ntsl-error-too-slow = The script took too long and was stopped.
+ntsl-error-unknown-name = '{$name}' doesn't exist.
+ntsl-error-not-a-function = Only functions can be called.
+ntsl-error-not-a-number = Expected a number.
+ntsl-error-not-a-list = Expected a list.
+ntsl-error-not-a-signal = broadcast() needs a signal, made with signal().
+ntsl-error-divide-by-zero = Can't divide by zero.
+ntsl-error-no-member = This value has no field '{$name}'.
+ntsl-error-bad-index = This value can't be indexed like that.
+ntsl-error-bad-key = Keys must be text.
+ntsl-error-index-out-of-range = Index {$index} is outside the list (it has {$count} items).
+ntsl-error-list-too-long = Lists can hold at most {$max} items.
+ntsl-error-too-many-broadcasts = A message can send at most {$max} broadcasts.
+ntsl-error-channel-not-on-server = This server has no encryption key for frequency {$freq}.
+ntsl-error-upload-cooldown = Wait a moment before uploading again.
