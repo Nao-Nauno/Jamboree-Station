@@ -47,7 +47,11 @@ ntsl-console-window-clear = Clear
 ntsl-console-window-log = Errors while running:
 ntsl-console-window-log-empty = No errors.
 ntsl-console-window-placeholder = def process_signal(sig) {"{"} return sig; {"}"}
-ntsl-console-server-label = {$name} #{$id}
+ntsl-console-server-label = {$name} #{$id} ({$channels}){$scripted ->
+    [true] {" "}[script]
+   *[false] {""}
+}
+ntsl-console-server-no-keys = no keys
 ntsl-console-upload-success = Script compiled and uploaded.
 ntsl-console-cleared = Script cleared.
 

@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.Linq;
 using Content.Shared._Jamboree.Telecomms;
+using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._Jamboree.Telecomms;
 
@@ -12,6 +15,7 @@ namespace Content.Server._Jamboree.Telecomms;
 /// </summary>
 public sealed class NtslConsoleSystem : EntitySystem
 {
+    [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly NtslTelecomSystem _ntsl = default!;
     [Dependency] private readonly SharedUserInterfaceSystem _ui = default!;
 
@@ -130,6 +134,19 @@ public sealed class NtslConsoleSystem : EntitySystem
 
     private string GetLabel(EntityUid server)
     {
-        return Loc.GetString("ntsl-console-server-label", ("name", Name(server)), ("id", GetNetEntity(server).Id));
+        var channels = string.Empty;
+        if (TryComp<EncryptionKeyHolderComponent>(server, out var keys) && keys.Channels.Count > 0)
+        {
+            channels = string.Join(", ", keys.Channels
+                .Select(id => _prototype.TryIndex<RadioChannelPrototype>(id, out var proto) ? proto.LocalizedName : id)
+                .Order());
+        }
+
+        var scripted = TryComp<NtslServerComponent>(server, out var script) && script.Code.Length > 0;
+        return Loc.GetString("ntsl-console-server-label",
+            ("name", Name(server)),
+            ("id", GetNetEntity(server).Id),
+            ("channels", channels.Length > 0 ? channels : Loc.GetString("ntsl-console-server-no-keys")),
+            ("scripted", scripted ? "true" : "false"));
     }
 }
