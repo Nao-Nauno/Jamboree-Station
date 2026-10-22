@@ -1,0 +1,78 @@
+<!--
+SPDX-FileCopyrightText: 2026 nao-nauno <desk.nao@gmail.com>
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
+<Document>
+  # NTSL Telecom Scripting
+  NTSL (NanoTrasen Scripting Language) lets you program the station's [color=#a4885c]telecommunication servers[/color]. A script can read every radio message a server operates and change it, reroute it, block it, or send new messages.
+
+  <Box>
+    <GuideEntityEmbed Entity="ComputerTelecomTraffic"/>
+    <GuideEntityEmbed Entity="TelecomServer"/>
+  </Box>
+
+  ## Uploading a script
+  - Use a [color=#a4885c]traffic control console[/color] (you will need Engineering access for this) on the same station as the servers.
+  - Pick a server, write your code, then press [bold]Compile and upload[/bold]. Any mistake is shown with their line number, and the old script keeps running.
+  - The [bold]Run scripts[/bold] checkbox turns a server's script on or off. [bold]Clear[/bold] deletes it.
+  - A script only sees messages on the channels whose encryption keys are in that server.
+
+  ## The basics
+  Every message runs the function [mono]process_signal[/mono]. It receives the message as [mono]sig[/mono]:
+  - [mono]sig.content[/mono]: the text of the message.
+  - [mono]sig.source[/mono]: the name of the speaker.
+  - [mono]sig.job[/mono]: the speaker's job.
+  - [mono]sig.freq[/mono]: the channel frequency. Set it to move the message to another channel on the same server.
+  - [mono]sig.channel[/mono]: the channel name (read only).
+  - [mono]sig.pass[/mono]: set it to 0 to block the message.
+
+  [mono]def process_signal(sig) {\n
+  \ \ if (sig.source == "Bob") {\n
+  \ \ \ \ sig.pass = 0;\n
+  \ \ }\n
+  \ \ sig.content = upper(sig.content);\n
+  \ \ return sig;\n
+  }[/mono]
+
+  Code outside of [mono]process_signal[/mono] runs once, when you upload. Variables set there are kept between messages.
+
+  ## Language
+  - Statements end with [mono];[/mono] and blocks use [mono]{ }[/mono]. Comments start with [mono]//[/mono] or go between [mono]/* */[/mono].
+  - Values are numbers, "strings" (or 'strings'), [mono]list(1, 2, "key" = "value")[/mono], [mono]null[/mono], [mono]true[/mono] and [mono]false[/mono].
+  - [mono]if (...) { } elseif (...) { } else { }[/mono], [mono]while (...) { }[/mono] and [mono]for (i = 1; i \<= 10; i += 1) { }[/mono], with [mono]break;[/mono] and [mono]continue;[/mono].
+  - [mono]def name(a, b) { return a + b; }[/mono] makes your own function.
+  - Operators: [mono]+ - * / % ^[/mono], [mono]== != \< \<= \> \>=[/mono], [mono]&& || ![/mono], [mono]= += -=[/mono]. Adding a string to anything joins them as text.
+  - Lists start at 1: [mono]words\[1][/mono], [mono]words.len[/mono], [mono]words += "more"[/mono].
+
+  ## Functions
+  - Text: [mono]length, lower, upper, find, substr, replace, explode, implode, tostring, tonum[/mono]. [mono]find[/mono] and [mono]replace[/mono] ignore upper and lower case.
+  - Math: [mono]abs, round, floor, ceil, sqrt, min, max, rand, prob, pick[/mono].
+  - [mono]signal(content, freq, source, job)[/mono] makes a new message, and [mono]broadcast(sig)[/mono] sends it (up to 5 per message and only on channels the server operates).
+  - [mono]mem(key)[/mono] reads and [mono]mem(key, value)[/mono] saves a value that survives new uploads. [mono]clearmem()[/mono] empties it.
+  - [mono]time()[/mono] gives the seconds since the round started. [mono]channels.medical[/mono] and similar give channel frequencies.
+
+  ## Limits
+  Each message may run at most 900 statements, 100 rounds per loop and 16 nested function calls. Text is cut at 1024 characters and lists at 256 items. When a script breaks a limit or hits an error, the message goes through unchanged and the error appears in the console's log.
+
+  ## Examples
+  Add the speaker's job after their name:
+
+  [mono]def process_signal(sig) {\n
+  \ \ sig.source = sig.source + " (" + sig.job + ")";\n
+  \ \ return sig;\n
+  }[/mono]
+
+  Let people talk anonymously by starting a message with /anon:
+
+  [mono]def process_signal(sig) {\n
+  \ \ if (find(sig.content, "/anon ") == 1) {\n
+  \ \ \ \ sig.source = "Anonymous";\n
+  \ \ \ \ sig.content = substr(sig.content, 7);\n
+  \ \ }\n
+  \ \ return sig;\n
+  }[/mono]
+
+  [color=#ff9900]Scripts are logged. Using them to grief the crew breaks the rules like any other griefing. Special circumstances, however, do apply ; for example if you play as an antagonist.[/color]
+</Document>

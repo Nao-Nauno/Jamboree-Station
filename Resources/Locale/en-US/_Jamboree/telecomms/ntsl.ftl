@@ -64,3 +64,7 @@ cmd-ntslwipe-help = Usage: ntslwipe <server entity id | all>
 cmd-ntslwipe-all = Wiped {$count} NTSL scripts.
 cmd-ntslwipe-one = Wiped the NTSL script on {$server}.
 cmd-ntsl-no-script = {$server} is not a telecom server with an NTSL script.
+
+## Guidebook
+
+guide-entry-ntsl = NTSL Scripting
