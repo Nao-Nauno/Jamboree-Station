@@ -106,6 +106,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         comp.Code = code;
         comp.Interpreter = interpreter;
+        comp.LastEditor = Name(user);
         comp.Log.Clear();
 
         var logged = code.Length > MaxLoggedCodeLength ? code[..MaxLoggedCodeLength] : code;

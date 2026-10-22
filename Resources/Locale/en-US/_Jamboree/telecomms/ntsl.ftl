@@ -50,3 +50,17 @@ ntsl-console-window-placeholder = def process_signal(sig) {"{"} return sig; {"}"
 ntsl-console-server-label = {$name} #{$id}
 ntsl-console-upload-success = Script compiled and uploaded.
 ntsl-console-cleared = Script cleared.
+
+## Admin commands
+
+cmd-ntsllist-desc = Lists every telecom server that has an NTSL script.
+cmd-ntsllist-help = Usage: ntsllist
+cmd-ntsllist-entry = {$server} | running: {$enabled} | {$length} characters | last edited by {$editor}
+cmd-ntsllist-none = No telecom server has an NTSL script.
+cmd-ntslshow-desc = Prints a telecom server's NTSL script and its recent errors.
+cmd-ntslshow-help = Usage: ntslshow <server entity id>
+cmd-ntslwipe-desc = Deletes the NTSL script from one telecom server, or from all of them.
+cmd-ntslwipe-help = Usage: ntslwipe <server entity id | all>
+cmd-ntslwipe-all = Wiped {$count} NTSL scripts.
+cmd-ntslwipe-one = Wiped the NTSL script on {$server}.
+cmd-ntsl-no-script = {$server} is not a telecom server with an NTSL script.

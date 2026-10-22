@@ -18,6 +18,9 @@ public sealed partial class NtslServerComponent : Component
     [DataField]
     public bool Enabled = true;
 
+    [DataField]
+    public string? LastEditor;
+
     [ViewVariables]
     public NtslInterpreter? Interpreter;
 
