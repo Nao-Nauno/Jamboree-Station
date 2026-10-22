@@ -2,16 +2,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Content.Server._Jamboree.Telecomms;
 using Content.Shared.Radio;
+using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._Jamboree;
 
 [TestFixture]
 public sealed class NtslTelecomTest
 {
+    private static readonly Regex MonoBlock = new(@"\[mono\](.*?)\[/mono\]", RegexOptions.Singleline | RegexOptions.Compiled);
+
     [TestPrototypes]
     private const string Prototypes = @"
 - type: entity
@@ -111,5 +118,90 @@ def process_signal(sig) {
         await pair.RunTicksSync(5);
 
         await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Every full example script in the guidebook page must upload and run without errors.
+    /// </summary>
+    [Test]
+    public async Task GuidebookExamplesWork()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var testMap = await pair.CreateTestMap();
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var resMan = server.ResolveDependency<IResourceManager>();
+        var ntsl = entMan.System<NtslTelecomSystem>();
+
+        var guide = resMan.ContentFileReadAllText(new ResPath("/ServerInfo/_Jamboree/Guidebook/Engineering/Ntsl.xml"));
+        var scripts = MonoBlock.Matches(guide)
+            .Select(match => Unescape(match.Groups[1].Value))
+            .Where(code => code.Contains("def process_signal"))
+            .ToList();
+
+        Assert.That(scripts, Has.Count.GreaterThanOrEqualTo(7));
+
+        var servers = new List<EntityUid>();
+        var speaker = EntityUid.Invalid;
+        await server.WaitAssertion(() =>
+        {
+            speaker = entMan.SpawnEntity(null, testMap.GridCoords);
+            foreach (var code in scripts)
+            {
+                var telecom = entMan.SpawnEntity("NtslTestTelecomServer", testMap.GridCoords);
+                Assert.That(ntsl.TryUpload(telecom, code, speaker, out var error), Is.True, $"{error}\n{code}");
+                ntsl.SetEnabled(telecom, false, speaker);
+                servers.Add(telecom);
+            }
+        });
+
+        await pair.RunTicksSync(5);
+
+        var messages = new[]
+        {
+            "hello there",
+            "/anon secret plan",
+            "/all everyone listen",
+            "/mute Bob",
+            "/8ball will it work?",
+            "call the shuttle",
+        };
+
+        for (var i = 0; i < servers.Count; i++)
+        {
+            var telecom = servers[i];
+            var code = scripts[i];
+            await server.WaitAssertion(() =>
+            {
+                ntsl.SetEnabled(telecom, true, speaker);
+                foreach (var text in messages)
+                {
+                    var message = text;
+                    var channel = protoMan.Index<RadioChannelPrototype>("Common");
+                    var name = "Your Name";
+                    string job = "Captain";
+                    ntsl.ProcessRadio(speaker, ref message, ref channel, ref name, ref job, out _);
+                }
+
+                ntsl.SetEnabled(telecom, false, speaker);
+                Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Log, Is.Empty, code);
+            });
+
+            await pair.RunTicksSync(2);
+        }
+
+        await pair.CleanReturnAsync();
+    }
+
+    private static string Unescape(string block)
+    {
+        var lines = block.Replace("\r", string.Empty)
+            .Split('\n')
+            .Select(line => line.Trim())
+            .Select(line => line.EndsWith("\\n") ? line[..^2] : line)
+            .Select(line => line.Replace("\\ ", " ").Replace("\\[", "[").Replace("\\<", "<").Replace("\\>", ">"));
+
+        return string.Join("\n", lines);
     }
 }
