@@ -17,7 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
         <BoxContainer Name="ServerPanel" Orientation="Vertical" VerticalExpand="True" SeparationOverride="6"
                       Visible="False">
             <CheckBox Name="EnabledCheckBox" Text="{Loc 'ntsl-console-window-enabled'}" />
-            <TextEdit Name="CodeEdit" VerticalExpand="True" HorizontalExpand="True" MinHeight="280" />
+            <TextEdit Name="CodeEdit" StyleClasses="NtslCode" VerticalExpand="True" HorizontalExpand="True" MinHeight="280" />
             <BoxContainer Orientation="Horizontal" SeparationOverride="6">
                 <Button Name="UploadButton" Text="{Loc 'ntsl-console-window-upload'}" />
                 <Button Name="ClearButton" Text="{Loc 'ntsl-console-window-clear'}" />
