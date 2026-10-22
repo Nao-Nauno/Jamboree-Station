@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2026 nao-nauno <desk.nao@gmail.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+using Content.Server._Jamboree.Telecomms;
+using Content.Shared.Radio;
+using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
+
+namespace Content.IntegrationTests.Tests._Jamboree;
+
+[TestFixture]
+public sealed class NtslTelecomTest
+{
+    [TestPrototypes]
+    private const string Prototypes = @"
+- type: entity
+  id: NtslTestTelecomServer
+  parent: TelecomServerFilled
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false
+";
+
+    private const string Script = @"
+def process_signal(sig) {
+    words = explode(sig.content, "" "");
+    if (sig.source == ""Bob"") { sig.pass = 0; }
+    if (words[1] == ""/med"") {
+        sig.content = substr(sig.content, 6);
+        sig.freq = channels.medical;
+    }
+    sig.source = upper(sig.source);
+    return sig;
+}
+";
+
+    [Test]
+    public async Task ScriptsRewriteRerouteAndBlock()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var testMap = await pair.CreateTestMap();
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var ntsl = entMan.System<NtslTelecomSystem>();
+
+        var speaker = EntityUid.Invalid;
+        await server.WaitAssertion(() =>
+        {
+            var telecom = entMan.SpawnEntity("NtslTestTelecomServer", testMap.GridCoords);
+            speaker = entMan.SpawnEntity(null, testMap.GridCoords);
+
+            Assert.That(ntsl.TryUpload(telecom, Script, speaker, out var error), Is.True, error);
+        });
+
+        await pair.RunTicksSync(5);
+
+        await server.WaitAssertion(() =>
+        {
+            var common = protoMan.Index<RadioChannelPrototype>("Common");
+
+            bool Send(string text, string sender, out string message, out RadioChannelPrototype channel,
+                out string name)
+            {
+                message = text;
+                channel = common;
+                name = sender;
+                string job = null;
+                return ntsl.ProcessRadio(speaker, ref message, ref channel, ref name, ref job);
+            }
+
+            var muted = Send("hello", "Bob", out _, out _, out _);
+            var rerouted = Send("/med help me", "Alice", out var medMessage, out var medChannel, out var medName);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(muted, Is.False);
+                Assert.That(rerouted, Is.True);
+                Assert.That(medMessage, Is.EqualTo("help me"));
+                Assert.That(medChannel.ID, Is.EqualTo("Medical"));
+                Assert.That(medName, Is.EqualTo("ALICE"));
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+}
