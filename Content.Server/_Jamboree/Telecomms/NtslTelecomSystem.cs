@@ -175,8 +175,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         foreach (var server in _servers)
         {
-            // TODO
-            var interpreter = server.Comp1.Interpreter;
+            var interpreter = GetInterpreter(server);
             if (interpreter == null || !interpreter.HasFunction(EntryFunction))
                 continue;
 
@@ -223,6 +222,29 @@ public sealed class NtslTelecomSystem : EntitySystem
     public string FormatError(NtslException e)
     {
         return Loc.GetString("ntsl-error-at-line", ("line", e.Line), ("error", Loc.GetString(e.Message, e.Args)));
+    }
+
+    private NtslInterpreter? GetInterpreter(Entity<NtslServerComponent, EncryptionKeyHolderComponent> server)
+    {
+        var comp = server.Comp1;
+        if (comp.Interpreter != null)
+            return comp.Interpreter;
+
+        try
+        {
+            var interpreter = NtslInterpreter.Compile(comp.Code);
+            Bind(server.Owner, interpreter);
+            _broadcastsThisRun = 0;
+            interpreter.Run();
+            comp.Interpreter = interpreter;
+        }
+        catch (NtslException e)
+        {
+            AddLog(comp, FormatError(e));
+            comp.Enabled = false;
+        }
+
+        return comp.Interpreter;
     }
 
     private void Bind(EntityUid server, NtslInterpreter interpreter)
