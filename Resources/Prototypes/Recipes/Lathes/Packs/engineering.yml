@@ -99,6 +99,7 @@
   - PortableGeneratorJrPacmanMachineCircuitboard
   - EmitterCircuitboard
   - TelecomServerCircuitboard
+  - TelecomTrafficComputerCircuitboard # Jamboree~ NTSL traffic control console
   - SMESAdvancedMachineCircuitboard
   - SMESHyperAdvancedMachineCircuitboard
   - HolopadMachineCircuitboard

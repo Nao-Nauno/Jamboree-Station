@@ -15,6 +15,9 @@ public sealed partial class NtslServerComponent : Component
     [DataField]
     public string Code = string.Empty;
 
+    [DataField]
+    public bool Enabled = true;
+
     [ViewVariables]
     public NtslInterpreter? Interpreter;
 

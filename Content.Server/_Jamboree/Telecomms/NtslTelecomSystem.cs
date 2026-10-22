@@ -116,6 +116,31 @@ public sealed class NtslTelecomSystem : EntitySystem
         return true;
     }
 
+    public void Clear(EntityUid server, EntityUid? user)
+    {
+        if (!TryComp<NtslServerComponent>(server, out var comp))
+            return;
+
+        comp.Code = string.Empty;
+        comp.Interpreter = null;
+        comp.Memory.Clear();
+        comp.Log.Clear();
+
+        if (user != null)
+        {
+            _adminLogger.Add(LogType.ItemConfigure, LogImpact.Medium,
+                $"{ToPrettyString(user.Value):user} cleared the NTSL script on {ToPrettyString(server):server}");
+        }
+    }
+
+    public void SetEnabled(EntityUid server, bool enabled, EntityUid user)
+    {
+        var comp = EnsureComp<NtslServerComponent>(server);
+        comp.Enabled = enabled;
+
+        _adminLogger.Add(LogType.ItemConfigure, LogImpact.Medium, $"{ToPrettyString(user):user} turned NTSL scripts {(enabled ? "on" : "off")} on {ToPrettyString(server):server}");
+    }
+
     /// <summary>
     /// Runs the scripts of every powered telecom server that operates this channel.
     /// Returns false if a script blocked the message.
@@ -131,7 +156,11 @@ public sealed class NtslTelecomSystem : EntitySystem
         var query = EntityQueryEnumerator<NtslServerComponent, EncryptionKeyHolderComponent, ApcPowerReceiverComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out var script, out var keys, out var power, out var xform))
         {
-            if (script.Code.Length > 0 && power.Powered && xform.MapID == mapId && keys.Channels.Contains(channel.ID))
+            if (script.Enabled
+                && script.Code.Length > 0
+                && power.Powered
+                && xform.MapID == mapId
+                && keys.Channels.Contains(channel.ID))
             {
                 _servers.Add((uid, script, keys));
             }

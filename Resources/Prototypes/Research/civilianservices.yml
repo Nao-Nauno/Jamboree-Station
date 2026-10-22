@@ -108,6 +108,7 @@
   - SurveillanceCameraMonitorCircuitboard
   - SurveillanceWirelessCameraMonitorCircuitboard
   - TelecomServerCircuitboard
+  - TelecomTrafficComputerCircuitboard # Jamboree~ NTSL traffic control console
   - HolopadMachineCircuitboard
   # Goobstation R&D Console rework start
   position: 1,4

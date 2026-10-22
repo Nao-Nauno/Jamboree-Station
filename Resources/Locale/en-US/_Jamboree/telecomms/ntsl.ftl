@@ -33,3 +33,20 @@ ntsl-error-list-too-long = Lists can hold at most {$max} items.
 ntsl-error-too-many-broadcasts = A message can send at most {$max} broadcasts.
 ntsl-error-channel-not-on-server = This server has no encryption key for frequency {$freq}.
 ntsl-error-upload-cooldown = Wait a moment before uploading again.
+
+## Traffic control console
+
+ntsl-console-window-title = Traffic control console
+ntsl-console-window-server = Server:
+ntsl-console-window-choose-server = Choose a server...
+ntsl-console-window-refresh = Refresh
+ntsl-console-window-no-server = Choose a telecommunication server to edit its script.
+ntsl-console-window-enabled = Run scripts
+ntsl-console-window-upload = Compile and upload
+ntsl-console-window-clear = Clear
+ntsl-console-window-log = Errors while running:
+ntsl-console-window-log-empty = No errors.
+ntsl-console-window-placeholder = def process_signal(sig) {"{"} return sig; {"}"}
+ntsl-console-server-label = {$name} #{$id}
+ntsl-console-upload-success = Script compiled and uploaded.
+ntsl-console-cleared = Script cleared.
