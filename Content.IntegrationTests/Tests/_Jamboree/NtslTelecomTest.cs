@@ -171,7 +171,9 @@ def process_signal(sig) {
         {
             "hello there",
             "/anon secret plan",
+            "/anonsecret plan",
             "/all everyone listen",
+            "/alleveryone listen",
             "/mute Bob",
             "/8ball will it work?",
             "call the shuttle",

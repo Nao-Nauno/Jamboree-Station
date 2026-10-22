@@ -222,6 +222,8 @@ public sealed class NtslInterpreterTest
     [TestCase("return reverse(\"abc\");", "cba")]
     [TestCase("return reverse(list(1, 2, 3)).Join(\",\");", "3,2,1")]
     [TestCase("return proper(\"hello there\");", "Hello there")]
+    [TestCase("return \"(\" + trim(\"  hi there  \") + \")\";", "(hi there)")]
+    [TestCase("return trim(substr(\"/loudHello\", 6));", "Hello")]
     [TestCase("return round(log(100, 10));", "2")]
     [TestCase("return round(log(E));", "1")]
     [TestCase("return round(sin(90));", "1")]

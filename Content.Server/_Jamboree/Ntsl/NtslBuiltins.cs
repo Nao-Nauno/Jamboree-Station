@@ -44,6 +44,7 @@ public sealed partial class NtslInterpreter
         Register("repeat", Repeat);
         Register("reverse", Reverse);
         Register("proper", Proper);
+        Register("trim", (args, _) => ToText(Arg(args, 0)).Trim());
 
         Register("abs", (args, line) => Math.Abs(ToNumber(Arg(args, 0), line)));
         Register("round", (args, line) => Math.Round(ToNumber(Arg(args, 0), line), MidpointRounding.AwayFromZero));

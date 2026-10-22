@@ -52,11 +52,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   - List methods: [mono]Find(x)[/mono], [mono]Join(sep)[/mono], [mono]Copy(start, end)[/mono], [mono]Cut(start, end)[/mono], [mono]Add(...)[/mono], [mono]Remove(...)[/mono], [mono]Insert(index, ...)[/mono], [mono]Swap(a, b)[/mono]. Ranges stop just before [mono]end[/mono], and 0 means "to the end".
 
   ## Functions
-  - Text: [mono]length, lower, upper, proper, reverse, repeat, find, substr, replace, explode, implode, tostring, tonum[/mono]. [mono]find[/mono] and [mono]replace[/mono] ignore upper and lower case.
+  - Text: [mono]length, lower, upper, proper, reverse, repeat, trim, find, substr, replace, explode, implode, tostring, tonum[/mono]. [mono]find[/mono] and [mono]replace[/mono] ignore upper and lower case.
   - Math: [mono]abs, round, floor, ceil, sqrt, log, sin, cos, tan, asin, acos, atan, min, max, clamp, inrange[/mono]. Angles are in degrees. Constants: [mono]PI, E, SQRT2, NORTH, SOUTH, EAST, WEST[/mono].
   - Chance: [mono]prob(percent)[/mono], [mono]pick(...)[/mono], [mono]rand()[/mono] for 0 to 1, [mono]rand(n)[/mono] for a whole number from 0 to n, [mono]rand(low, high)[/mono].
   - [mono]signal(content, freq, source)[/mono] makes a new message and [mono]broadcast(sig)[/mono] sends it. [mono]broadcast(content, freq, source)[/mono] does both at once. Up to 10 per message, and only on channels the server operates: anything else returns 0.
   - [mono]mem(key)[/mono] reads and [mono]mem(key, value)[/mono] saves a value that survives new uploads. [mono]clearmem()[/mono] empties it.
+  - Commands: [mono]find(sig.raw, "/loud") == 1[/mono] is true for /loud Hello and /loudHello alike, whatever the speaker's accent. [mono]trim(substr(sig.raw, 6))[/mono] then gives the text after the command.
   - [mono]time()[/mono] gives the seconds since the round started. [mono]channels.common[/mono], [mono]channels.medical[/mono] and the other channel names give their frequencies.
 
   ## Filters
@@ -85,9 +86,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   [bold]Anonymous messages[/bold]: start a message with /anon to send it as "Anonymous".
 
   [mono]def process_signal(sig) {\n
-  \ \ words = explode(sig.content, " ");\n
-  \ \ if (words\[1] == "/anon") {\n
-  \ \ \ \ broadcast(implode(words - words\[1], " "), sig.freq, "Anonymous");\n
+  \ \ if (find(sig.raw, "/anon") == 1) {\n
+  \ \ \ \ broadcast(trim(substr(sig.raw, 6)), sig.freq, "Anonymous");\n
   \ \ \ \ return null;\n
   \ \ }\n
   \ \ return sig;\n
@@ -96,9 +96,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   [bold]Broadcast to all[/bold]: start a message with /all to send it on every department channel. Terminates-The-Notice may not like it though, so be warned.
 
   [mono]def process_signal(sig) {\n
-  \ \ words = explode(sig.content, " ");\n
-  \ \ if (words\[1] == "/all") {\n
-  \ \ \ \ sig.content = implode(words - words\[1], " ");\n
+  \ \ if (find(sig.raw, "/all") == 1) {\n
+  \ \ \ \ sig.content = trim(substr(sig.raw, 5));\n
   \ \ \ \ freqs = list(channels.common, channels.command, channels.engineering, channels.medical, channels.science, channels.security, channels.service, channels.supply);\n
   \ \ \ \ for (i = 1; i \<= freqs.len; i += 1) {\n
   \ \ \ \ \ \ sig.freq = freqs\[i];\n
@@ -115,9 +114,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   def process_signal(sig) {\n
   \ \ muted = mem("muted");\n
   \ \ if (muted == null) { muted = list(); }\n
-  \ \ words = explode(sig.content, " ");\n
-  \ \ if (words\[1] == "/mute" && users.Find(sig.source)) {\n
-  \ \ \ \ name = implode(words - words\[1], " ");\n
+  \ \ if (find(sig.raw, "/mute") == 1 && users.Find(sig.source)) {\n
+  \ \ \ \ name = trim(substr(sig.raw, 6));\n
   \ \ \ \ if (muted.Find(name)) { muted.Remove(name); } else { muted.Add(name); }\n
   \ \ \ \ mem("muted", muted);\n
   \ \ \ \ return null;\n
@@ -129,7 +127,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   [bold]Magic 8-Ball[/bold]: start a message with /8ball and the ball answers.
 
   [mono]def process_signal(sig) {\n
-  \ \ if (find(sig.content, "/8ball") == 1) {\n
+  \ \ if (find(sig.raw, "/8ball") == 1) {\n
   \ \ \ \ broadcast(pick("It is certain.", "Ask again later.", "Don't count on it.", "Signs point to yes."), sig.freq, "Magic 8-Ball");\n
   \ \ }\n
   \ \ return sig;\n
@@ -140,7 +138,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   [mono]blocked = list("shuttle", "call", "rogue", "malf");\n
   def process_signal(sig) {\n
   \ \ for (i = 1; i \<= blocked.len; i += 1) {\n
-  \ \ \ \ if (find(sig.content, blocked\[i])) { return null; }\n
+  \ \ \ \ if (find(sig.raw, blocked\[i])) { return null; }\n
   \ \ }\n
   \ \ return sig;\n
   }[/mono]
