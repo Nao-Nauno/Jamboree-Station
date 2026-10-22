@@ -30,6 +30,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
     public const string EntryFunction = "process_signal";
     public const int MaxBroadcastsPerRun = 5;
+    public const int LoudFontSize = 16;
     public const int MaxMemoryKeys = 500;
     public const int MaxLogEntries = 20;
     public const int MaxNameLength = 32;
@@ -40,7 +41,18 @@ public sealed class NtslTelecomSystem : EntitySystem
     private readonly List<Entity<NtslServerComponent, EncryptionKeyHolderComponent>> _servers = new();
     private int _broadcastsThisRun;
     private string? _broadcastName;
+    private NtslFilters _broadcastFilters;
     private bool _broadcasting;
+
+    private static readonly Dictionary<string, NtslFilters> FilterNames = new()
+    {
+        ["robot"] = NtslFilters.Robot,
+        ["yell"] = NtslFilters.Loud,
+        ["italics"] = NtslFilters.Italics,
+        ["sans"] = NtslFilters.Sans,
+        ["clown"] = NtslFilters.Sans,
+        ["command_headset"] = NtslFilters.Bold,
+    };
 
     public override void Initialize()
     {
@@ -61,6 +73,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
             _broadcasting = true;
             _broadcastName = broadcast.Source;
+            _broadcastFilters = broadcast.Filters;
             try
             {
                 _radio.SendRadioMessage(broadcast.Server, broadcast.Content, broadcast.Channel, broadcast.Server);
@@ -69,6 +82,7 @@ public sealed class NtslTelecomSystem : EntitySystem
             {
                 _broadcasting = false;
                 _broadcastName = null;
+                _broadcastFilters = NtslFilters.None;
             }
         }
     }
@@ -146,10 +160,14 @@ public sealed class NtslTelecomSystem : EntitySystem
     /// Runs the scripts of every powered telecom server that operates this channel.
     /// Returns false if a script blocked the message.
     /// </summary>
-    public bool ProcessRadio(EntityUid radioSource, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job)
+    public bool ProcessRadio(EntityUid radioSource, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job, out NtslFilters filters)
     {
+        filters = NtslFilters.None;
         if (_broadcasting)
+        {
+            filters = _broadcastFilters;
             return true;
+        }
 
         var mapId = Transform(radioSource).MapID;
         _servers.Clear();
@@ -215,6 +233,7 @@ public sealed class NtslTelecomSystem : EntitySystem
             message = CleanText(NtslInterpreter.ToText(output.Get("content")), NtslInterpreter.MaxStringLength, "*beep*");
             name = CleanText(NtslInterpreter.ToText(output.Get("source")), MaxNameLength, name);
             job = CleanText(NtslInterpreter.ToText(output.Get("job")), MaxNameLength, string.Empty);
+            filters = ParseFilters(output.Get("filters"));
 
             if (output.Get("freq") is double frequency
                 && frequency != channel.Frequency
@@ -265,6 +284,14 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         interpreter.Define("channels", channels);
 
+        var filterTypes = new NtslList();
+        filterTypes.Set("robot", "robot");
+        filterTypes.Set("loud", "yell");
+        filterTypes.Set("emphasis", "italics");
+        filterTypes.Set("wacky", "sans");
+        filterTypes.Set("commanding", "command_headset");
+        interpreter.Define("filter_types", filterTypes);
+
         interpreter.Register("signal", Signal);
         interpreter.Register("broadcast", (args, line) => Broadcast(server, args, line));
         interpreter.Register("mem", (args, line) => Mem(server, args, line));
@@ -282,6 +309,7 @@ public sealed class NtslTelecomSystem : EntitySystem
         signal.Set("source", source);
         signal.Set("job", job);
         signal.Set("pass", 1.0);
+        signal.Set("filters", new NtslList());
         return signal;
     }
 
@@ -312,8 +340,47 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         var content = CleanText(NtslInterpreter.ToText(signal.Get("content")), NtslInterpreter.MaxStringLength, "*beep*");
         var source = CleanText(NtslInterpreter.ToText(signal.Get("source")), MaxNameLength, Name(server));
-        _broadcasts.Enqueue(new PendingBroadcast(server, content, source, channel));
+        var filters = ParseFilters(signal.Get("filters"));
+        _broadcasts.Enqueue(new PendingBroadcast(server, content, source, channel, filters));
         return 1.0;
+    }
+
+    private static NtslFilters ParseFilters(object? value)
+    {
+        var filters = NtslFilters.None;
+        if (value is not NtslList list)
+            return filters;
+
+        foreach (var item in list.Items)
+        {
+            if (item is string text && FilterNames.TryGetValue(text.ToLowerInvariant(), out var filter))
+                filters |= filter;
+        }
+
+        return filters;
+    }
+
+    /// <summary>
+    /// Wraps already-escaped message text in the chat markup for the filters a script chose.
+    /// </summary>
+    public static string ApplyFilters(string content, NtslFilters filters)
+    {
+        if ((filters & NtslFilters.Italics) != 0)
+            content = $"[italic]{content}[/italic]";
+
+        if ((filters & NtslFilters.Bold) != 0)
+            content = $"[bold]{content}[/bold]";
+
+        if ((filters & NtslFilters.Sans) != 0)
+            content = $"[font=\"LDFComicSans\"]{content}[/font]";
+
+        if ((filters & NtslFilters.Robot) != 0)
+            content = $"[font=\"Monospace\"]{content}[/font]";
+
+        if ((filters & NtslFilters.Loud) != 0)
+            content = $"[font size={LoudFontSize}]{content}[/font]";
+
+        return content;
     }
 
     private object? Mem(EntityUid server, List<object?> args, int line)
@@ -386,5 +453,20 @@ public sealed class NtslTelecomSystem : EntitySystem
         EntityUid Server,
         string Content,
         string Source,
-        RadioChannelPrototype Channel);
+        RadioChannelPrototype Channel,
+        NtslFilters Filters);
+}
+
+/// <summary>
+/// Chat styles an NTSL script can put on a radio message through sig.filters.
+/// </summary>
+[Flags]
+public enum NtslFilters : byte
+{
+    None = 0,
+    Robot = 1 << 0,
+    Loud = 1 << 1,
+    Italics = 1 << 2,
+    Sans = 1 << 3,
+    Bold = 1 << 4,
 }

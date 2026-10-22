@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2020 Bright <nsmoak10@yahoo.com>
+// SPDX-FileCopyrightText: 2020 Bright <nsmoak10@yahoo.com>
 // SPDX-FileCopyrightText: 2020 Bright0 <55061890+Bright0@users.noreply.github.com>
 // SPDX-FileCopyrightText: 2020 Swept <jamesurquhartwebb@gmail.com>
 // SPDX-FileCopyrightText: 2020 V├¡ctor Aguilera Puerto <6766154+Zumorica@users.noreply.github.com>
@@ -188,7 +188,7 @@ public sealed partial class RadioSystem : EntitySystem
         // Jamboree~ NTSL telecom scripts can rewrite, reroute or block the message
         var scriptedMessage = message;
         var scriptedName = evt.VoiceName;
-        if (!_ntsl.ProcessRadio(radioSource, ref scriptedMessage, ref channel, ref scriptedName, ref jobName))
+        if (!_ntsl.ProcessRadio(radioSource, ref scriptedMessage, ref channel, ref scriptedName, ref jobName, out var ntslFilters))
         {
             _messages.Remove(message);
             return;
@@ -225,7 +225,7 @@ public sealed partial class RadioSystem : EntitySystem
         //     ("channel", $"\\[{channel.LocalizedName}\\]"),
         //     ("name", name),
         //     ("message", content));
-        var wrappedMessage = WrapRadioMessage(messageSource, channel, name, content, language, jobIcon, jobName); // Einstein Engines - Language
+        var wrappedMessage = WrapRadioMessage(messageSource, channel, name, NtslTelecomSystem.ApplyFilters(content, ntslFilters), language, jobIcon, jobName); // Einstein Engines - Language // Jamboree~ NTSL filters
 
         // most radios are relayed to chat, so lets parse the chat message beforehand
         // var chat = new ChatMessage(
@@ -244,7 +244,7 @@ public sealed partial class RadioSystem : EntitySystem
         var obfuscated = _language.ObfuscateSpeech(content, language);
         // Goobstation - Chat Pings
         // Added GetNetEntity(messageSource), to source
-        var obfuscatedWrapped = WrapRadioMessage(messageSource, channel, name, obfuscated, language, jobIcon, jobName);
+        var obfuscatedWrapped = WrapRadioMessage(messageSource, channel, name, NtslTelecomSystem.ApplyFilters(obfuscated, ntslFilters), language, jobIcon, jobName); // Jamboree~ NTSL filters
         var notUdsMsg = new ChatMessage(ChatChannel.Radio, obfuscated, obfuscatedWrapped, GetNetEntity(messageSource), null);
         var ev = new RadioReceiveEvent(messageSource, channel, msg, notUdsMsg, language, radioSource);
         // Einstein Engines - Language end
