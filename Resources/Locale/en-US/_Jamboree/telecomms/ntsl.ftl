@@ -31,7 +31,6 @@ ntsl-error-bad-key = Keys must be text.
 ntsl-error-index-out-of-range = Index {$index} is outside the list (it has {$count} items).
 ntsl-error-list-too-long = Lists can hold at most {$max} items.
 ntsl-error-too-many-broadcasts = A message can send at most {$max} broadcasts.
-ntsl-error-channel-not-on-server = This server has no encryption key for frequency {$freq}.
 ntsl-error-upload-cooldown = Wait a moment before uploading again.
 
 ## Traffic control console

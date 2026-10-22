@@ -29,7 +29,7 @@ public sealed class NtslTelecomSystem : EntitySystem
     [Dependency] private readonly RadioSystem _radio = default!;
 
     public const string EntryFunction = "process_signal";
-    public const int MaxBroadcastsPerRun = 5;
+    public const int MaxBroadcastsPerRun = 10;
     public const int LoudFontSize = 16;
     public const int MaxMemoryKeys = 500;
     public const int MaxLogEntries = 20;
@@ -325,8 +325,10 @@ public sealed class NtslTelecomSystem : EntitySystem
 
     private object? Broadcast(EntityUid server, List<object?> args, int line)
     {
-        if (args.Count == 0 || args[0] is not NtslList signal)
+        if (args.Count == 0)
             throw new NtslException("ntsl-error-not-a-signal", line);
+
+        var signal = args[0] as NtslList ?? (NtslList) Signal(args, line)!;
 
         if (++_broadcastsThisRun > MaxBroadcastsPerRun)
             throw new NtslException("ntsl-error-too-many-broadcasts", line, ("max", MaxBroadcastsPerRun));
@@ -336,7 +338,7 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         var frequency = signal.Get("freq") is double number ? number : CommonFrequency;
         if (!TryGetChannel(keys, frequency, out var channel))
-            throw new NtslException("ntsl-error-channel-not-on-server", line, ("freq", frequency));
+            return 0.0;
 
         var content = CleanText(NtslInterpreter.ToText(signal.Get("content")), NtslInterpreter.MaxStringLength, "*beep*");
         var source = CleanText(NtslInterpreter.ToText(signal.Get("source")), MaxNameLength, Name(server));

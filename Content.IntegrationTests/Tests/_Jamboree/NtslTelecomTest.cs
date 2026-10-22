@@ -34,6 +34,17 @@ def process_signal(sig) {
     if (words[1] == ""/loud"") {
         sig.filters = list(filter_types.loud, ""italics"");
     }
+    if (words[1] == ""/all"") {
+        sig.pass = 0;
+        sig.content = implode(words - words[1], "" "");
+        freqs = list(1459, 1447, 1359, 1357, 1355, 1353, 1351, 1349, 1347);
+        sent = 0;
+        for (i = 1; i <= freqs.len; i += 1) {
+            sig.freq = freqs[i];
+            sent += broadcast(sig);
+        }
+        mem(""sent"", sent);
+    }
     sig.source = upper(sig.source);
     return sig;
 }
@@ -50,9 +61,10 @@ def process_signal(sig) {
         var ntsl = entMan.System<NtslTelecomSystem>();
 
         var speaker = EntityUid.Invalid;
+        var telecom = EntityUid.Invalid;
         await server.WaitAssertion(() =>
         {
-            var telecom = entMan.SpawnEntity("NtslTestTelecomServer", testMap.GridCoords);
+            telecom = entMan.SpawnEntity("NtslTestTelecomServer", testMap.GridCoords);
             speaker = entMan.SpawnEntity(null, testMap.GridCoords);
 
             Assert.That(ntsl.TryUpload(telecom, Script, speaker, out var error), Is.True, error);
@@ -78,6 +90,7 @@ def process_signal(sig) {
             var blocked = Send("/block this", "Alice", out _, out _, out _, out _);
             var rerouted = Send("/med help me", "Alice", out var medMessage, out var medChannel, out var medName, out _);
             var loud = Send("/loud HEY", "Alice", out _, out _, out _, out var loudFilters);
+            var all = Send("/all everyone listen", "Alice", out _, out _, out _, out _);
 
             Assert.Multiple(() =>
             {
@@ -89,9 +102,13 @@ def process_signal(sig) {
                 Assert.That(medName, Is.EqualTo("ALICE"));
                 Assert.That(loud, Is.True);
                 Assert.That(loudFilters, Is.EqualTo(NtslFilters.Loud | NtslFilters.Italics));
+                Assert.That(all, Is.False);
+                Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Memory["sent"], Is.EqualTo(8.0));
                 Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Italics), Is.EqualTo($"[font size={NtslTelecomSystem.LoudFontSize}][italic]hi[/italic][/font]"));
             });
         });
+
+        await pair.RunTicksSync(5);
 
         await pair.CleanReturnAsync();
     }
