@@ -194,8 +194,16 @@ public sealed class NtslTelecomSystem : EntitySystem
                 continue;
             }
 
+            // Like on Yogstation, "return null;" blocks the message.
             if (result is not NtslList output)
-                continue;
+            {
+                if (!interpreter.Returned)
+                    continue;
+
+                _adminLogger.Add(LogType.Chat, LogImpact.Low,
+                    $"NTSL script on {ToPrettyString(server.Owner):server} blocked a radio message from {name} via {ToPrettyString(radioSource):entity} on {channel.LocalizedName}: {message}");
+                return false;
+            }
 
             if (!NtslInterpreter.IsTrue(output.Get("pass")))
             {

@@ -28,6 +28,7 @@ public sealed partial class NtslInterpreter
     private int _statements;
     private int _callDepth;
     private object? _returnValue;
+    private bool _lastCallReturned;
 
     private enum Flow : byte
     {
@@ -69,6 +70,11 @@ public sealed partial class NtslInterpreter
         ExecuteBlock(_program, _globals);
     }
 
+    /// <summary>
+    /// Whether the last <see cref="Call"/> ended with a return statement, rather than running off the end.
+    /// </summary>
+    public bool Returned { get; private set; }
+
     public bool HasFunction(string name)
     {
         return _globals.TryGet(name, out var value) && value is NtslFunction;
@@ -80,7 +86,10 @@ public sealed partial class NtslInterpreter
         if (!_globals.TryGet(name, out var function))
             throw new NtslException("ntsl-error-unknown-name", 1, ("name", name));
 
-        return CallValue(function, args.ToList(), 1);
+        _lastCallReturned = false;
+        var result = CallValue(function, args.ToList(), 1);
+        Returned = _lastCallReturned;
+        return result;
     }
 
     private void BeginRun()
@@ -334,6 +343,7 @@ public sealed partial class NtslInterpreter
 
         var flow = ExecuteBlock(function.Def.Body, scope);
         var result = flow == Flow.Return ? _returnValue : null;
+        _lastCallReturned = flow == Flow.Return;
         _returnValue = null;
         _callDepth--;
         return result;

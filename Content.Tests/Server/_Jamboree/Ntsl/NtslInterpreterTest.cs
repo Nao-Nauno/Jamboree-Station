@@ -250,4 +250,25 @@ public sealed class NtslInterpreterTest
 
         Assert.That(seen, Is.EquivalentTo(new[] { "0", "1", "2", "3" }));
     }
+
+    [Test]
+    public void ReturnedTracksExplicitReturns()
+    {
+        var interpreter = NtslInterpreter.Compile("def get(x) { if (x == 1) { return null; } if (x == 2) { return; } }");
+        interpreter.Run();
+
+        interpreter.Call("get", 1.0);
+        var explicitNull = interpreter.Returned;
+        interpreter.Call("get", 2.0);
+        var bareReturn = interpreter.Returned;
+        interpreter.Call("get", 3.0);
+        var fellOff = interpreter.Returned;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(explicitNull, Is.True);
+            Assert.That(bareReturn, Is.True);
+            Assert.That(fellOff, Is.False);
+        });
+    }
 }

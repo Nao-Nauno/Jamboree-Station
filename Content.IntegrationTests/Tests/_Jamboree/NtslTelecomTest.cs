@@ -26,6 +26,7 @@ public sealed class NtslTelecomTest
 def process_signal(sig) {
     words = explode(sig.content, "" "");
     if (sig.source == ""Bob"") { sig.pass = 0; }
+    if (words[1] == ""/block"") { return null; }
     if (words[1] == ""/med"") {
         sig.content = substr(sig.content, 6);
         sig.freq = channels.medical;
@@ -71,11 +72,13 @@ def process_signal(sig) {
             }
 
             var muted = Send("hello", "Bob", out _, out _, out _);
+            var blocked = Send("/block this", "Alice", out _, out _, out _);
             var rerouted = Send("/med help me", "Alice", out var medMessage, out var medChannel, out var medName);
 
             Assert.Multiple(() =>
             {
                 Assert.That(muted, Is.False);
+                Assert.That(blocked, Is.False);
                 Assert.That(rerouted, Is.True);
                 Assert.That(medMessage, Is.EqualTo("help me"));
                 Assert.That(medChannel.ID, Is.EqualTo("Medical"));
