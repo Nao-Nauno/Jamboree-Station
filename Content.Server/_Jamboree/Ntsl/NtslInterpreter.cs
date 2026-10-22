@@ -425,10 +425,16 @@ public sealed partial class NtslInterpreter
         return (target, index) switch
         {
             (NtslList list, string key) => list.Get(key),
-            (NtslList list, double number) => list.Items[ToPosition(number, list.Items.Count, line)],
-            (string text, double number) => text[ToPosition(number, text.Length, line)].ToString(),
+            (NtslList list, double number) => InRange(number, list.Items.Count) ? list.Items[(int) number - 1] : null,
+            (string text, double number) => InRange(number, text.Length) ? text[(int) number - 1].ToString() : null,
+            (NtslList or string, null) => null,
             _ => throw new NtslException("ntsl-error-bad-index", line),
         };
+    }
+
+    private static bool InRange(double number, int count)
+    {
+        return number >= 1 && number <= count;
     }
 
     private static void SetIndex(object? target, object? index, object? value, int line)

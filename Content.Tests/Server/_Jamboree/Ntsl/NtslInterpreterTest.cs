@@ -174,7 +174,7 @@ public sealed class NtslInterpreterTest
         {
             Assert.That(Error("def get() { return 1 / 0; }"), Is.EqualTo("ntsl-error-divide-by-zero"));
             Assert.That(Error("def get() { return nope; }"), Is.EqualTo("ntsl-error-unknown-name"));
-            Assert.That(Error("def get() { l = list(1); return l[5]; }"), Is.EqualTo("ntsl-error-index-out-of-range"));
+            Assert.That(Error("def get() { l = list(1); l[5] = 2; }"), Is.EqualTo("ntsl-error-index-out-of-range"));
             Assert.That(Error("x = ;"), Is.EqualTo("ntsl-error-expected-expression"));
             Assert.That(Error("if (a) { b = 1;"), Is.EqualTo("ntsl-error-unexpected-end"));
             Assert.That(Error("1 = 2;"), Is.EqualTo("ntsl-error-invalid-assignment"));
@@ -187,5 +187,16 @@ public sealed class NtslInterpreterTest
     public void ShortCircuit()
     {
         Assert.That(Run("def boom() { return 1 / 0; } def get() { return 0 && boom(); }"), Is.EqualTo("0"));
+    }
+
+    [Test]
+    [TestCase("return l[5];", "")]
+    [TestCase("return l[0];", "")]
+    [TestCase("return \"abc\"[9];", "")]
+    [TestCase("m = list(); m -= m[1]; return m.len;", "0")]
+    [TestCase("return explode(\"/calc\", \" \")[2] == null;", "1")]
+    public void MissingIndexIsNull(string body, string expected)
+    {
+        Assert.That(Run($"def get() {{ l = list(1); {body} }}"), Is.EqualTo(expected));
     }
 }
