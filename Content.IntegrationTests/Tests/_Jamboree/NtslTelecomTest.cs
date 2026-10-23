@@ -137,6 +137,11 @@ def process_signal(sig) {
                 Assert.That(all, Is.False);
                 Assert.That(catMessage, Is.EqualTo("itsss ssso nice nya"));
                 Assert.That(langMessage, Is.EqualTo(draconic.Name));
+                Assert.That(ntsl.HideCommand(speaker, "/langHi", basic), Is.EqualTo("Hi"));
+                Assert.That(ntsl.HideCommand(speaker, "/CATits so nice", basic), Is.EqualTo("itsss ssso nice"));
+                Assert.That(ntsl.HideCommand(speaker, "/lang", basic), Is.Empty);
+                Assert.That(ntsl.HideCommand(speaker, "/unknown hi", basic), Is.Null);
+                Assert.That(ntsl.HideCommand(speaker, "hello", basic), Is.Null);
                 Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Memory["sent"], Is.EqualTo(8.0));
                 Assert.That(broadcastLanguages, Has.Count.EqualTo(8).And.All.EqualTo("Draconic"));
                 Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Italics), Is.EqualTo("[bolditalic]hi[/bolditalic]"));

@@ -4,6 +4,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Content.Server._Jamboree.Ntsl;
 using Content.Server.Administration.Logs;
 using Content.Server.Chat.Systems;
@@ -18,6 +19,7 @@ using Content.Shared.Radio;
 using Content.Shared.Radio.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
+using Robust.Shared.Utility;
 
 namespace Content.Server._Jamboree.Telecomms;
 
@@ -50,6 +52,9 @@ public sealed class NtslTelecomSystem : EntitySystem
     private bool _broadcasting;
     private EntityUid? _speaker;
     private LanguagePrototype? _speakerLanguage;
+
+    // Commands are the "/word" texts a script looks for, like find(sig.raw, "/loud").
+    private static readonly Regex CommandRegex = new(@"[""'](/[A-Za-z0-9_]+)", RegexOptions.Compiled);
 
     private static readonly Dictionary<string, NtslFilters> FilterNames = new()
     {
@@ -260,6 +265,39 @@ public sealed class NtslTelecomSystem : EntitySystem
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// What people nearby hear when someone says an NTSL command into their radio: only the text after it.
+    /// Null when the message doesn't start with a cummand that a running script looks for.
+    /// </summary>
+    public string? HideCommand(EntityUid speaker, string raw, LanguagePrototype language)
+    {
+        raw = raw.Trim();
+        if (!raw.StartsWith('/'))
+            return null;
+
+        var mapId = Transform(speaker).MapID;
+        var command = string.Empty;
+        var query = EntityQueryEnumerator<NtslServerComponent, ApcPowerReceiverComponent, TransformComponent>();
+        while (query.MoveNext(out var script, out var power, out var xform))
+        {
+            if (!script.Enabled || !power.Powered || xform.MapID != mapId)
+                continue;
+
+            foreach (Match match in CommandRegex.Matches(script.Code))
+            {
+                var found = match.Groups[1].Value;
+                if (found.Length > command.Length && raw.StartsWith(found, StringComparison.OrdinalIgnoreCase))
+                    command = found;
+            }
+        }
+
+        if (command.Length == 0)
+            return null;
+
+        var rest = FormattedMessage.EscapeText(raw[command.Length..].Trim());
+        return rest.Length == 0 ? rest : _chat.TransformSpeech(speaker, rest, language);
     }
 
     public string FormatError(NtslException e)

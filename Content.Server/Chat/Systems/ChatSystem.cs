@@ -160,6 +160,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Replays;
 using Robust.Shared.Utility;
+using Content.Server._Jamboree.Telecomms; // Jamboree~ NTSL
 
 namespace Content.Server.Chat.Systems;
 
@@ -191,6 +192,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     [Dependency] private readonly ScryingOrbSystem _scrying = default!; // Goobstation Change
     [Dependency] private readonly CollectiveMindUpdateSystem _collectiveMind = default!; // Goobstation - Starlight collective mind port
     [Dependency] private readonly LanguageSystem _language = default!; // Einstein Engines - Language
+    [Dependency] private readonly NtslTelecomSystem _ntsl = default!; // Jamboree~ NTSL
 
     public const int VoiceRange = 10; // how far voice goes in world units
     public const int WhisperClearRange = 2; // how far whisper goes while still being understandable, in world units
@@ -817,12 +819,21 @@ public sealed partial class ChatSystem : SharedChatSystem
             name = FormattedMessage.EscapeText(nameOverride ?? Name(ent));
         }
 
-        var languageObfuscatedMessage = SanitizeInGameICMessage(source, _language.ObfuscateSpeech(message, language), out var emoteStr, true, _configurationManager.GetCVar(CCVars.ChatPunctuation),
+        // Jamboree~ people nearby don't hear the NTSL command said into a radio, only the text after it
+        var heardMessage = channel == null
+            ? message
+            : _ntsl.HideCommand(source, FormattedMessage.RemoveMarkupOrThrow(originalMessage), language) ?? message;
+        // Jamboree~ end
+
+        var languageObfuscatedMessage = SanitizeInGameICMessage(source, _language.ObfuscateSpeech(heardMessage, language), out var emoteStr, true, _configurationManager.GetCVar(CCVars.ChatPunctuation),
         (!CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Parent.Name == "en")
         || (CultureInfo.CurrentCulture.IsNeutralCulture && CultureInfo.CurrentCulture.Name == "en")); // Einstein Engines - Language
 
         foreach (var (session, data) in GetRecipients(source, WhisperMuffledRange))
         {
+            if (heardMessage.Length == 0)
+                break; // Jamboree~ only an NTSL command, nothing to hear
+
             if (session.AttachedEntity is not { Valid: true } listener)
                 continue;
 
@@ -837,7 +848,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             // Einstein Engines - Language begin
             var canUnderstandLanguage = _language.CanUnderstand(listener, language.ID);
             // How the entity perceives the message depends on whether it can understand its language
-            var perceivedMessage = canUnderstandLanguage ? message : languageObfuscatedMessage;
+            var perceivedMessage = canUnderstandLanguage ? heardMessage : languageObfuscatedMessage; // Jamboree~ heardMessage
 
             // Result is the intermediate message derived from the perceived one via obfuscation
             // Wrapped message is the result wrapped in an "x says y" string
