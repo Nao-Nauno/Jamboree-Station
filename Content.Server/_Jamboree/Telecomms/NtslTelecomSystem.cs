@@ -40,7 +40,7 @@ public sealed class NtslTelecomSystem : EntitySystem
     public const int CommandingFontSize = 14;
     public const int MaxMemoryKeys = 500;
     public const int MaxLogEntries = 20;
-    public const int MaxNameLength = 32;
+    public const int MaxNameLength = 64;
     public const int MaxLoggedCodeLength = 2000;
     public static readonly TimeSpan UploadCooldown = TimeSpan.FromSeconds(2);
 
