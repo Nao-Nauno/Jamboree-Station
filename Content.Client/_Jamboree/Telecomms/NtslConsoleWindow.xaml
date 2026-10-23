@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                       Visible="False">
             <CheckBox Name="EnabledCheckBox" Text="{Loc 'ntsl-console-window-enabled'}" />
             <TextEdit Name="CodeEdit" StyleClasses="NtslCode" VerticalExpand="True" HorizontalExpand="True" MinHeight="280" />
+            <RichTextLabel Name="HintLabel" />
             <BoxContainer Orientation="Horizontal" SeparationOverride="6">
                 <Button Name="UploadButton" Text="{Loc 'ntsl-console-window-upload'}" />
                 <Button Name="ClearButton" Text="{Loc 'ntsl-console-window-clear'}" />

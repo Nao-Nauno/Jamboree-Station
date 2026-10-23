@@ -3,11 +3,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Content.Server._Jamboree.Ntsl;
 using Content.Server.Administration.Logs;
+using Content.Server.Chat.Systems;
 using Content.Server.GameTicking;
 using Content.Server.Power.Components;
 using Content.Server.Radio.EntitySystems;
+using Content.Shared._EinsteinEngines.Language;
+using Content.Shared._EinsteinEngines.Language.Systems;
 using Content.Shared.Chat;
 using Content.Shared.Database;
 using Content.Shared.Radio;
@@ -25,6 +29,7 @@ public sealed class NtslTelecomSystem : EntitySystem
     [Dependency] private readonly IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
+    [Dependency] private readonly ChatSystem _chat = default!;
     [Dependency] private readonly GameTicker _ticker = default!;
     [Dependency] private readonly RadioSystem _radio = default!;
 
@@ -43,6 +48,8 @@ public sealed class NtslTelecomSystem : EntitySystem
     private string? _broadcastName;
     private NtslFilters _broadcastFilters;
     private bool _broadcasting;
+    private EntityUid? _speaker;
+    private LanguagePrototype? _speakerLanguage;
 
     private static readonly Dictionary<string, NtslFilters> FilterNames = new()
     {
@@ -76,7 +83,7 @@ public sealed class NtslTelecomSystem : EntitySystem
             _broadcastFilters = broadcast.Filters;
             try
             {
-                _radio.SendRadioMessage(broadcast.Server, broadcast.Content, broadcast.Channel, broadcast.Server);
+                _radio.SendRadioMessage(broadcast.Server, broadcast.Content, broadcast.Channel, broadcast.Server, broadcast.Language);
             }
             finally
             {
@@ -160,7 +167,7 @@ public sealed class NtslTelecomSystem : EntitySystem
     /// Runs the scripts of every powered telecom server that operates this channel.
     /// Returns false if a script blocked the message.
     /// </summary>
-    public bool ProcessRadio(EntityUid radioSource, string raw, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job, out NtslFilters filters)
+    public bool ProcessRadio(EntityUid messageSource, EntityUid radioSource, LanguagePrototype language, string raw, ref string message, ref RadioChannelPrototype channel, ref string name, ref string? job, out NtslFilters filters)
     {
         filters = NtslFilters.None;
         if (_broadcasting)
@@ -200,17 +207,25 @@ public sealed class NtslTelecomSystem : EntitySystem
             var signal = MakeSignal(message, channel.Frequency, name, job ?? string.Empty);
             signal.Set("channel", channel.LocalizedName);
             signal.Set("raw", raw);
+            signal.Set("language", language.Name);
 
             object? result;
             try
             {
                 _broadcastsThisRun = 0;
+                _speaker = messageSource;
+                _speakerLanguage = language;
                 result = interpreter.Call(EntryFunction, signal);
             }
             catch (NtslException e)
             {
                 AddLog(server.Comp1, FormatError(e));
                 continue;
+            }
+            finally
+            {
+                _speaker = null;
+                _speakerLanguage = null;
             }
 
             // Like on Yogstation, "return null;" blocks the message.
@@ -298,6 +313,16 @@ public sealed class NtslTelecomSystem : EntitySystem
         interpreter.Register("mem", (args, line) => Mem(server, args, line));
         interpreter.Register("clearmem", (_, _) => ClearMem(server));
         interpreter.Register("time", (_, _) => _ticker.RoundDuration().TotalSeconds);
+        interpreter.Register("accent", (args, _) => Accent(NtslInterpreter.ToText(args.Count > 0 ? args[0] : null)));
+    }
+
+    // sig.raw has no accent, so a script that builds a message from it can put the speaker's accent back.
+    private string Accent(string text)
+    {
+        if (_speaker is not { } speaker || _speakerLanguage == null || TerminatingOrDeleted(speaker))
+            return text;
+
+        return _chat.TransformSpeech(speaker, text, _speakerLanguage);
     }
 
     private double CommonFrequency => _prototype.Index(SharedChatSystem.CommonChannel).Frequency;
@@ -344,7 +369,10 @@ public sealed class NtslTelecomSystem : EntitySystem
         var content = CleanText(NtslInterpreter.ToText(signal.Get("content")), NtslInterpreter.MaxStringLength, "*beep*");
         var source = CleanText(NtslInterpreter.ToText(signal.Get("source")), MaxNameLength, Name(server));
         var filters = ParseFilters(signal.Get("filters"));
-        _broadcasts.Enqueue(new PendingBroadcast(server, content, source, channel, filters));
+        // A broadcast speaks the language of the message being handled, so scripts can't translate.
+        // Outside of a message it is the station's common language.
+        var language = _speakerLanguage ?? _prototype.Index<LanguagePrototype>(SharedLanguageSystem.FallbackLanguagePrototype);
+        _broadcasts.Enqueue(new PendingBroadcast(server, content, source, channel, filters, language));
         return 1.0;
     }
 
@@ -459,12 +487,15 @@ public sealed class NtslTelecomSystem : EntitySystem
         return clean.Length == 0 ? fallback : clean;
     }
 
+    internal IEnumerable<string> QueuedBroadcastLanguages => _broadcasts.Select(broadcast => broadcast.Language.ID);
+
     private readonly record struct PendingBroadcast(
         EntityUid Server,
         string Content,
         string Source,
         RadioChannelPrototype Channel,
-        NtslFilters Filters);
+        NtslFilters Filters,
+        LanguagePrototype Language);
 }
 
 /// <summary>

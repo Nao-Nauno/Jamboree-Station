@@ -17,6 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   - Use a [color=#a4885c]traffic control console[/color] (you will need Engineering access for this) on the same station as the servers.
   - Pick a server, write your code, then press [bold]Compile and upload[/bold]. Any mistake is shown with their line number, and the old script keeps running.
   - The [bold]Run scripts[/bold] checkbox turns a server's script on or off. [bold]Clear[/bold] deletes it.
+  - In the editor, [bold]Tab[/bold] finishes a name you started typing. The line under the editor shows what the function you are typing needs.
   - A script only sees messages on the channels whose encryption keys are in that server.
 
   ## The basics
@@ -27,6 +28,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   - [mono]sig.job[/mono]: the speaker's job.
   - [mono]sig.freq[/mono]: the channel frequency. Set it to move the message to another channel on the same server.
   - [mono]sig.channel[/mono]: the channel name (read only).
+  - [mono]sig.language[/mono]: the language it was spoken in, like Tau Ceti Basic.
   - [mono]sig.filters[/mono]: a list of styles for the text, see Filters below.
   - [mono]sig.pass[/mono]: set it to 0 to block the message.
 
@@ -52,12 +54,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   - List methods: [mono]Find(x)[/mono], [mono]Join(sep)[/mono], [mono]Copy(start, end)[/mono], [mono]Cut(start, end)[/mono], [mono]Add(...)[/mono], [mono]Remove(...)[/mono], [mono]Insert(index, ...)[/mono], [mono]Swap(a, b)[/mono]. Ranges stop just before [mono]end[/mono], and 0 means "to the end".
 
   ## Functions
-  - Text: [mono]length, lower, upper, proper, reverse, repeat, trim, find, substr, replace, explode, implode, tostring, tonum[/mono]. [mono]find[/mono] and [mono]replace[/mono] ignore upper and lower case.
+  - Text: [mono]length, lower, upper, proper, reverse, repeat, trim, find, substr, replace, explode, implode, tostring, tonum, accent[/mono]. [mono]find[/mono] and [mono]replace[/mono] ignore upper and lower case.
   - Math: [mono]abs, round, floor, ceil, sqrt, log, sin, cos, tan, asin, acos, atan, min, max, clamp, inrange[/mono]. Angles are in degrees. Constants: [mono]PI, E, SQRT2, NORTH, SOUTH, EAST, WEST[/mono].
   - Chance: [mono]prob(percent)[/mono], [mono]pick(...)[/mono], [mono]rand()[/mono] for 0 to 1, [mono]rand(n)[/mono] for a whole number from 0 to n, [mono]rand(low, high)[/mono].
   - [mono]signal(content, freq, source)[/mono] makes a new message and [mono]broadcast(sig)[/mono] sends it. [mono]broadcast(content, freq, source)[/mono] does both at once. Up to 10 per message, and only on channels the server operates: anything else returns 0.
   - [mono]mem(key)[/mono] reads and [mono]mem(key, value)[/mono] saves a value that survives new uploads. [mono]clearmem()[/mono] empties it.
-  - Commands: [mono]find(sig.raw, "/loud") == 1[/mono] is true for /loud Hello and /loudHello alike, whatever the speaker's accent. [mono]trim(substr(sig.raw, 6))[/mono] then gives the text after the command.
+  - Commands: [mono]find(sig.raw, "/loud") == 1[/mono] is true for /loud Hello and /loudHello alike, whatever the speaker's accent. [mono]trim(substr(sig.raw, 6))[/mono] then gives the text after the command. Wrap it in [mono]accent(...)[/mono] to give it back the speaker's accent.
   - [mono]time()[/mono] gives the seconds since the round started. [mono]channels.common[/mono], [mono]channels.medical[/mono] and the other channel names give their frequencies.
 
   ## Filters
@@ -98,7 +100,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
   [mono]def process_signal(sig) {\n
   \ \ if (find(sig.raw, "/all") == 1) {\n
-  \ \ \ \ sig.content = trim(substr(sig.raw, 5));\n
+  \ \ \ \ sig.content = accent(trim(substr(sig.raw, 5)));\n
   \ \ \ \ freqs = list(channels.common, channels.command, channels.engineering, channels.medical, channels.science, channels.security, channels.service, channels.supply);\n
   \ \ \ \ for (i = 1; i \<= freqs.len; i += 1) {\n
   \ \ \ \ \ \ sig.freq = freqs\[i];\n

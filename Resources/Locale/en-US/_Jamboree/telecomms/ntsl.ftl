@@ -46,6 +46,8 @@ ntsl-console-window-clear = Clear
 ntsl-console-window-log = Errors while running:
 ntsl-console-window-log-empty = No errors.
 ntsl-console-window-placeholder = def process_signal(sig) {"{"} return sig; {"}"}
+ntsl-console-window-hint-tip = Tab finishes a name you started typing.
+ntsl-console-window-hint-choices = Tab: {$names}
 ntsl-console-server-label = {$name} #{$id} ({$channels}){$scripted ->
     [true] {" "}[script]
    *[false] {""}

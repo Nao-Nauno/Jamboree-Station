@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Server._Jamboree.Telecomms;
+using Content.Server.Speech.Components;
+using Content.Shared._EinsteinEngines.Language;
 using Content.Shared.Radio;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
@@ -53,6 +55,8 @@ def process_signal(sig) {
         mem(""sent"", sent);
     }
     if (sig.raw == ""what I typed"") { sig.content = sig.raw; }
+    if (sig.raw == ""/lang"") { sig.content = sig.language; }
+    if (find(sig.raw, ""/cat"") == 1) { sig.content = accent(trim(substr(sig.raw, 5))) + "" nya""; }
     sig.source = upper(sig.source);
     return sig;
 }
@@ -83,15 +87,17 @@ def process_signal(sig) {
         await server.WaitAssertion(() =>
         {
             var common = protoMan.Index<RadioChannelPrototype>("Common");
+            var basic = protoMan.Index<LanguagePrototype>("TauCetiBasic");
+            var draconic = protoMan.Index<LanguagePrototype>("Draconic");
 
             bool Send(string text, string sender, out string message, out RadioChannelPrototype channel,
-                out string name, out NtslFilters filters)
+                out string name, out NtslFilters filters, LanguagePrototype language = null)
             {
                 message = text;
                 channel = common;
                 name = sender;
                 string job = null;
-                return ntsl.ProcessRadio(speaker, text, ref message, ref channel, ref name, ref job, out filters);
+                return ntsl.ProcessRadio(speaker, speaker, language ?? basic, text, ref message, ref channel, ref name, ref job, out filters);
             }
 
             var muted = Send("hello", "Bob", out _, out _, out _, out _);
@@ -100,12 +106,22 @@ def process_signal(sig) {
             var hissedChannel = common;
             var hissedName = "Alice";
             string hissedJob = null;
-            ntsl.ProcessRadio(speaker, "what I typed", ref hissedMessage, ref hissedChannel, ref hissedName, ref hissedJob, out _);
+            ntsl.ProcessRadio(speaker, speaker, basic, "what I typed", ref hissedMessage, ref hissedChannel, ref hissedName, ref hissedJob, out _);
 
             var blocked = Send("/block this", "Alice", out _, out _, out _, out _);
             var rerouted = Send("/med help me", "Alice", out var medMessage, out var medChannel, out var medName, out _);
             var loud = Send("/loud HEY", "Alice", out _, out _, out _, out var loudFilters);
-            var all = Send("/all everyone listen", "Alice", out _, out _, out _, out _);
+            var all = Send("/all everyone listen", "Alice", out _, out _, out _, out _, draconic);
+            var broadcastLanguages = ntsl.QueuedBroadcastLanguages.ToList();
+
+            entMan.AddComponent<LizardAccentComponent>(speaker);
+            Send("/catits so nice", "Alice", out var catMessage, out _, out _, out _);
+
+            var langMessage = "/lang";
+            var langChannel = common;
+            var langName = "Alice";
+            string langJob = null;
+            ntsl.ProcessRadio(speaker, speaker, draconic, "/lang", ref langMessage, ref langChannel, ref langName, ref langJob, out _);
 
             Assert.Multiple(() =>
             {
@@ -119,7 +135,10 @@ def process_signal(sig) {
                 Assert.That(loud, Is.True);
                 Assert.That(loudFilters, Is.EqualTo(NtslFilters.Loud | NtslFilters.Italics));
                 Assert.That(all, Is.False);
+                Assert.That(catMessage, Is.EqualTo("itsss ssso nice nya"));
+                Assert.That(langMessage, Is.EqualTo(draconic.Name));
                 Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Memory["sent"], Is.EqualTo(8.0));
+                Assert.That(broadcastLanguages, Has.Count.EqualTo(8).And.All.EqualTo("Draconic"));
                 Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Italics), Is.EqualTo("[bolditalic]hi[/bolditalic]"));
                 Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Loud | NtslFilters.Robot), Is.EqualTo("[font=\"MonospaceBold\"]hi[/font]"));
                 Assert.That(NtslTelecomSystem.ApplyFilters("hi", NtslFilters.Commanding), Is.EqualTo($"[font size={NtslTelecomSystem.CommandingFontSize}][bold]hi[/bold][/font]"));
@@ -194,7 +213,8 @@ def process_signal(sig) {
                     var channel = protoMan.Index<RadioChannelPrototype>("Common");
                     var name = "Your Name";
                     string job = "Captain";
-                    ntsl.ProcessRadio(speaker, text, ref message, ref channel, ref name, ref job, out _);
+                    var language = protoMan.Index<LanguagePrototype>("TauCetiBasic");
+                    ntsl.ProcessRadio(speaker, speaker, language, text, ref message, ref channel, ref name, ref job, out _);
                 }
 
                 ntsl.SetEnabled(telecom, false, speaker);

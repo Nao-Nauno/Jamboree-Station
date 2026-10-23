@@ -190,7 +190,7 @@ public sealed partial class RadioSystem : EntitySystem
         // Jamboree~ NTSL telecom scripts can rewrite, reroute or block the message
         var scriptedMessage = message;
         var scriptedName = evt.VoiceName;
-        if (!_ntsl.ProcessRadio(radioSource, rawMessage ?? message, ref scriptedMessage, ref channel, ref scriptedName, ref jobName, out var ntslFilters))
+        if (!_ntsl.ProcessRadio(messageSource, radioSource, language, rawMessage ?? message, ref scriptedMessage, ref channel, ref scriptedName, ref jobName, out var ntslFilters))
         {
             _messages.Remove(message);
             return;
