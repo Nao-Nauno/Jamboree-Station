@@ -138,7 +138,7 @@ public sealed class NtslConsoleSystem : EntitySystem
         if (TryComp<EncryptionKeyHolderComponent>(server, out var keys) && keys.Channels.Count > 0)
         {
             channels = string.Join(", ", keys.Channels
-                .Select(id => _prototype.TryIndex<RadioChannelPrototype>(id, out var proto) ? proto.LocalizedName : id)
+                .Select(id => _prototype.TryIndex<RadioChannelPrototype>(id, out var proto) ? proto.LocalizedName : id.Id)
                 .Order());
         }
 
