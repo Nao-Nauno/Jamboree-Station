@@ -14,9 +14,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   </Box>
 
   ## Uploading a script
-  - Use a [color=#a4885c]traffic control console[/color] (you will need Engineering access for this) on the same station as the servers.
+  - Use a [color=#a4885c]traffic control console[/color] (you will need Engineering access for this) on the same station as the servers. If the station has none, print its board at an engineering or science fabricator.
   - Pick a server, write your code, then press [bold]Compile and upload[/bold]. Any mistake is shown with their line number, and the old script keeps running.
-  - The [bold]Run scripts[/bold] checkbox turns a server's script on or off. [bold]Clear[/bold] deletes it.
+  - The [bold]Run scripts[/bold] checkbox turns a server's script on or off. [bold]Clear[/bold] deletes it. [bold]Restore previous[/bold] puts back the script it had before the last upload, handy after a prank or a bad upload.
   - In the editor, [bold]Tab[/bold] finishes a name you started typing. The line under the editor shows what the function you are typing needs.
   - A script only sees messages on the channels whose encryption keys are in that server.
 

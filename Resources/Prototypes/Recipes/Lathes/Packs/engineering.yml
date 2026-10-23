@@ -57,6 +57,7 @@
   recipes:
   - SpaceHeaterMachineCircuitBoard
   - CondenserMachineCircuitBoard # Goob
+  - TelecomTrafficComputerCircuitboard # Jamboree~ NTSL traffic control console
 
 ## Dynamic
 
@@ -93,7 +94,6 @@
   - PortableGeneratorJrPacmanMachineCircuitboard
   - EmitterCircuitboard
   - TelecomServerCircuitboard
-  - TelecomTrafficComputerCircuitboard # Jamboree~ NTSL traffic control console
   - SMESAdvancedMachineCircuitboard
   - SMESHyperAdvancedMachineCircuitboard
   - HolopadMachineCircuitboard
