@@ -22,6 +22,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
             <BoxContainer Orientation="Horizontal" SeparationOverride="6">
                 <Button Name="UploadButton" Text="{Loc 'ntsl-console-window-upload'}" />
                 <Button Name="ClearButton" Text="{Loc 'ntsl-console-window-clear'}" />
+                <Button Name="RestoreButton" Text="{Loc 'ntsl-console-window-restore'}"
+                        ToolTip="{Loc 'ntsl-console-window-restore-tooltip'}" />
             </BoxContainer>
             <RichTextLabel Name="OutputLabel" />
             <Label Text="{Loc 'ntsl-console-window-log'}" />

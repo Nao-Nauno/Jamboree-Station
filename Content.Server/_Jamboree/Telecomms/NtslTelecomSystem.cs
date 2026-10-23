@@ -116,6 +116,25 @@ public sealed class NtslTelecomSystem : EntitySystem
 
         comp.NextUpload = _timing.CurTime + UploadCooldown;
 
+        if (!TryInstall(server, code, out error))
+            return false;
+
+        comp.LastEditor = Name(user);
+
+        var logged = code.Length > MaxLoggedCodeLength ? code[..MaxLoggedCodeLength] : code;
+        _adminLogger.Add(LogType.ItemConfigure, LogImpact.Medium, $"{ToPrettyString(user):user} uploaded an NTSL script ({code.Length} characters) to {ToPrettyString(server):server}:\n{logged}");
+
+        return true;
+    }
+
+    /// <summary>
+    /// Compiles a script and puts it on a server in place of the old one.
+    /// Unlike <see cref="TryUpload"/> there is no user and no cooldown, so station events use this.
+    /// </summary>
+    public bool TryInstall(EntityUid server, string code, [NotNullWhen(false)] out string? error)
+    {
+        var comp = EnsureComp<NtslServerComponent>(server);
+
         NtslInterpreter interpreter;
         try
         {
@@ -130,14 +149,13 @@ public sealed class NtslTelecomSystem : EntitySystem
             return false;
         }
 
+        if (comp.Code != code)
+            comp.PreviousCode = comp.Code;
+
         comp.Code = code;
         comp.Interpreter = interpreter;
-        comp.LastEditor = Name(user);
+        comp.LastEditor = null;
         comp.Log.Clear();
-
-        var logged = code.Length > MaxLoggedCodeLength ? code[..MaxLoggedCodeLength] : code;
-        _adminLogger.Add(LogType.ItemConfigure, LogImpact.Medium,
-            $"{ToPrettyString(user):user} uploaded an NTSL script ({code.Length} characters) to {ToPrettyString(server):server}:\n{logged}");
 
         error = null;
         return true;

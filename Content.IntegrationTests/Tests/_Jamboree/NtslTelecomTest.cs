@@ -19,6 +19,9 @@ namespace Content.IntegrationTests.Tests._Jamboree;
 [TestFixture]
 public sealed class NtslTelecomTest
 {
+    private static readonly ProtoId<RadioChannelPrototype> CommonChannel = "Common";
+    private static readonly ProtoId<LanguagePrototype> BasicLanguage = "TauCetiBasic";
+
     private static readonly Regex MonoBlock = new(@"\[mono\](.*?)\[/mono\]", RegexOptions.Singleline | RegexOptions.Compiled);
 
     [TestPrototypes]
@@ -227,6 +230,89 @@ def process_signal(sig) {
             });
 
             await pair.RunTicksSync(2);
+        }
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Every script the NTSL station events can install compiles and handles messages without errors.
+    /// </summary>
+    [Test]
+    public async Task StationEventScriptsWork()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var testMap = await pair.CreateTestMap();
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var protoMan = server.ResolveDependency<IPrototypeManager>();
+        var compFactory = server.ResolveDependency<IComponentFactory>();
+        var ntsl = entMan.System<NtslTelecomSystem>();
+
+        var scripts = protoMan.EnumeratePrototypes<EntityPrototype>()
+            .Where(proto => !proto.Abstract)
+            .SelectMany(proto => proto.TryComp<NtslScriptRuleComponent>(out var rule, compFactory)
+                ? rule.Scripts.Select(script => rule.Header + script)
+                : Enumerable.Empty<string>())
+            .Select(code => code.Replace("payload_start = time();", "payload_start = time() - 1000;"))
+            .ToList();
+
+        Assert.That(scripts.Count(code => code.Contains("payload_start = time() - 1000;")), Is.GreaterThanOrEqualTo(6));
+
+        Assert.That(scripts, Has.Count.GreaterThanOrEqualTo(7));
+
+        var messages = new[]
+        {
+            "what the hell, shit happens",
+            string.Join(" ", Enumerable.Repeat("Help! The captain is dead, the station is on fire and security arrested the clown.", 4)),
+        };
+
+        var servers = new List<EntityUid>();
+        var speaker = EntityUid.Invalid;
+        await server.WaitAssertion(() =>
+        {
+            speaker = entMan.SpawnAtPosition(null, testMap.GridCoords);
+            foreach (var code in scripts)
+            {
+                var telecom = entMan.SpawnAtPosition("NtslTestTelecomServer", testMap.GridCoords);
+                Assert.That(ntsl.TryInstall(telecom, code, out var error), Is.True, $"{error}\n{code}");
+                ntsl.SetEnabled(telecom, false, speaker);
+                servers.Add(telecom);
+            }
+        });
+
+        await pair.RunTicksSync(5);
+
+        for (var i = 0; i < servers.Count; i++)
+        {
+            var telecom = servers[i];
+            var code = scripts[i];
+            await server.WaitAssertion(() =>
+            {
+                ntsl.SetEnabled(telecom, true, speaker);
+
+                foreach (var text in messages)
+                {
+                    var message = text;
+                    var channel = protoMan.Index(CommonChannel);
+                    var name = "Your Name";
+                    string job = "Captain";
+                    var passed = ntsl.ProcessRadio(speaker, speaker, protoMan.Index(BasicLanguage), text, ref message, ref channel, ref name, ref job, out _);
+                    Assert.That(passed, Is.True, code);
+
+                    if (code.Contains("Corporate Communications Standard") && text == messages[1])
+                        Assert.That(message, Does.StartWith("Requesting synergy! The Chief Synergy Officer is permanently offboarded, the profit center is on unplanned thermal event"));
+
+                    if (code.Contains("replace(text, \"a\", \"4\")") && text == messages[0])
+                        Assert.That(message, Is.EqualTo("wh47 7h3 h3ll, 5h17 h4pp3n5"));
+
+                    if (code.Contains("-kssht-") && text == messages[1])
+                        Assert.That(message, Does.Contain("-kssht-"));
+                }
+
+                ntsl.SetEnabled(telecom, false, speaker);
+                Assert.That(entMan.GetComponent<NtslServerComponent>(telecom).Log, Is.Empty, code);
+            });
         }
 
         await pair.CleanReturnAsync();

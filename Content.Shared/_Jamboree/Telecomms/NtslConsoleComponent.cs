@@ -33,7 +33,7 @@ public sealed class NtslConsoleServerEntry(NetEntity server, string label)
 }
 
 [Serializable, NetSerializable]
-public sealed class NtslConsoleBoundUserInterfaceState(List<NtslConsoleServerEntry> servers, NetEntity? selected, bool enabled, string code, List<string> log, string? output) : BoundUserInterfaceState
+public sealed class NtslConsoleBoundUserInterfaceState(List<NtslConsoleServerEntry> servers, NetEntity? selected, bool enabled, string code, List<string> log, string? output, bool hasPrevious) : BoundUserInterfaceState
 {
     public List<NtslConsoleServerEntry> Servers { get; } = servers;
     public NetEntity? Selected { get; } = selected;
@@ -41,6 +41,7 @@ public sealed class NtslConsoleBoundUserInterfaceState(List<NtslConsoleServerEnt
     public string Code { get; } = code;
     public List<string> Log { get; } = log;
     public string? Output { get; } = output;
+    public bool HasPrevious { get; } = hasPrevious;
 }
 
 [Serializable, NetSerializable]
@@ -57,6 +58,9 @@ public sealed class NtslConsoleUploadMessage(string code) : BoundUserInterfaceMe
 
 [Serializable, NetSerializable]
 public sealed class NtslConsoleClearMessage : BoundUserInterfaceMessage;
+
+[Serializable, NetSerializable]
+public sealed class NtslConsoleRestoreMessage : BoundUserInterfaceMessage;
 
 [Serializable, NetSerializable]
 public sealed class NtslConsoleSetEnabledMessage(bool enabled) : BoundUserInterfaceMessage

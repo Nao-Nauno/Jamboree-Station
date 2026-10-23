@@ -21,6 +21,12 @@ public sealed partial class NtslServerComponent : Component
     [DataField]
     public string? LastEditor;
 
+    /// <summary>
+    /// The script this server ran before the last upload, so a console can bring it back.
+    /// </summary>
+    [DataField]
+    public string PreviousCode = string.Empty;
+
     [ViewVariables]
     public NtslInterpreter? Interpreter;
 

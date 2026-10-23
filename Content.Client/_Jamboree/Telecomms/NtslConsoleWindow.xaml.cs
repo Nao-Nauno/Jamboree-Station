@@ -24,11 +24,12 @@ public sealed partial class NtslConsoleWindow : DefaultWindow
     private const string Indent = "    ";
     private const int MaxShownChoices = 8;
 
-    [Dependency] private readonly IPrototypeManager _prototype = default!;
+    [Dependency] private IPrototypeManager _prototype = default!;
 
     public event Action<NetEntity>? OnServerSelected;
     public event Action<string>? OnUpload;
     public event Action? OnClear;
+    public event Action? OnRestore;
     public event Action<bool>? OnEnabledChanged;
     public event Action? OnRefresh;
 
@@ -62,6 +63,7 @@ public sealed partial class NtslConsoleWindow : DefaultWindow
         RefreshButton.OnPressed += _ => OnRefresh?.Invoke();
         UploadButton.OnPressed += _ => OnUpload?.Invoke(Rope.Collapse(CodeEdit.TextRope));
         ClearButton.OnPressed += _ => OnClear?.Invoke();
+        RestoreButton.OnPressed += _ => OnRestore?.Invoke();
         EnabledCheckBox.OnToggled += args => OnEnabledChanged?.Invoke(args.Pressed);
     }
 
@@ -90,6 +92,7 @@ public sealed partial class NtslConsoleWindow : DefaultWindow
         }
 
         EnabledCheckBox.Pressed = state.Enabled;
+        RestoreButton.Disabled = !state.HasPrevious;
         OutputLabel.SetMessage(FormattedMessage.FromUnformatted(state.Output ?? string.Empty));
 
         var log = state.Log.Count == 0

@@ -43,6 +43,8 @@ ntsl-console-window-no-server = Choose a telecommunication server to edit its sc
 ntsl-console-window-enabled = Run scripts
 ntsl-console-window-upload = Compile and upload
 ntsl-console-window-clear = Clear
+ntsl-console-window-restore = Restore previous
+ntsl-console-window-restore-tooltip = Puts back the script this server had before the last upload.
 ntsl-console-window-log = Errors while running:
 ntsl-console-window-log-empty = No errors.
 ntsl-console-window-placeholder = def process_signal(sig) {"{"} return sig; {"}"}
@@ -55,6 +57,7 @@ ntsl-console-server-label = {$name} #{$id} ({$channels}){$scripted ->
 ntsl-console-server-no-keys = no keys
 ntsl-console-upload-success = Script compiled and uploaded.
 ntsl-console-cleared = Script cleared.
+ntsl-console-restored = Previous script restored.
 
 ## Admin commands
 
@@ -69,6 +72,13 @@ cmd-ntslwipe-help = Usage: ntslwipe <server entity id | all>
 cmd-ntslwipe-all = Wiped {$count} NTSL scripts.
 cmd-ntslwipe-one = Wiped the NTSL script on {$server}.
 cmd-ntsl-no-script = {$server} is not a telecom server with an NTSL script.
+
+## Station events
+
+station-event-ntsl-rogue-script-announcement = Unknown code has been detected on one of the station's telecommunication servers.
+station-event-ntsl-centcom-filter-start-announcement = Central Command has installed a mandatory communications compliance script on all telecommunication servers. It will be lifted automatically. Please do not remove it.
+station-event-ntsl-centcom-filter-removed-announcement = Central Command has detected that its communications compliance script was removed ahead of schedule. This has been noted in the station's quarterly performance review.
+station-event-ntsl-centcom-filter-end-announcement = The communications compliance script has been lifted. Previous server scripts have been restored.
 
 ## Guidebook
 

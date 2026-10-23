@@ -19,6 +19,7 @@ public sealed class NtslConsoleBoundUserInterface(EntityUid owner, Enum uiKey) :
         _window.OnServerSelected += server => SendMessage(new NtslConsoleSelectServerMessage(server));
         _window.OnUpload += code => SendMessage(new NtslConsoleUploadMessage(code));
         _window.OnClear += () => SendMessage(new NtslConsoleClearMessage());
+        _window.OnRestore += () => SendMessage(new NtslConsoleRestoreMessage());
         _window.OnEnabledChanged += enabled => SendMessage(new NtslConsoleSetEnabledMessage(enabled));
         _window.OnRefresh += () => SendMessage(new NtslConsoleRefreshMessage());
     }

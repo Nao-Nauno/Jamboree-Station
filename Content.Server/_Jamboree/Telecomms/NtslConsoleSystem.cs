@@ -27,6 +27,7 @@ public sealed class NtslConsoleSystem : EntitySystem
         SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleSelectServerMessage>(OnSelectServer);
         SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleUploadMessage>(OnUpload);
         SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleClearMessage>(OnClear);
+        SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleRestoreMessage>(OnRestore);
         SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleSetEnabledMessage>(OnSetEnabled);
         SubscribeLocalEvent<NtslConsoleComponent, NtslConsoleRefreshMessage>(OnRefresh);
     }
@@ -66,6 +67,22 @@ public sealed class NtslConsoleSystem : EntitySystem
 
         _ntsl.Clear(server, args.Actor);
         ent.Comp.Output = Loc.GetString("ntsl-console-cleared");
+        UpdateUi(ent);
+    }
+
+    private void OnRestore(Entity<NtslConsoleComponent> ent, ref NtslConsoleRestoreMessage args)
+    {
+        if (!TryGetSelectedServer(ent, out var server)
+            || !TryComp<NtslServerComponent>(server, out var script)
+            || script.PreviousCode.Length == 0)
+        {
+            return;
+        }
+
+        ent.Comp.Output = _ntsl.TryUpload(server, script.PreviousCode, args.Actor, out var error)
+            ? Loc.GetString("ntsl-console-restored")
+            : error;
+
         UpdateUi(ent);
     }
 
@@ -116,6 +133,7 @@ public sealed class NtslConsoleSystem : EntitySystem
         var enabled = true;
         var code = string.Empty;
         var log = new List<string>();
+        var hasPrevious = false;
 
         if (console.Comp.SelectedServer is { } server)
         {
@@ -125,10 +143,11 @@ public sealed class NtslConsoleSystem : EntitySystem
                 enabled = script.Enabled;
                 code = script.Code;
                 log.AddRange(script.Log);
+                hasPrevious = script.PreviousCode.Length > 0;
             }
         }
 
-        var state = new NtslConsoleBoundUserInterfaceState(servers, selected, enabled, code, log, console.Comp.Output);
+        var state = new NtslConsoleBoundUserInterfaceState(servers, selected, enabled, code, log, console.Comp.Output, hasPrevious);
         _ui.SetUiState(console.Owner, NtslConsoleUiKey.Key, state);
     }
 
