@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Content.Goobstation.Common.DoAfter; // Goobstation
 using Content.Shared._Shitmed.DoAfter; // Shitmed
-using Content.Shared._Tech.Tinkering; // Jamboree~ gnomes
+using Content.Shared._Jamboree.Tinkering; // Jamboree~ gnomes
 using Content.Shared.ActionBlocker;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;

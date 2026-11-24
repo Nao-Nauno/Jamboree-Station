@@ -2,7 +2,7 @@
 
 using System.Numerics;
 using Content.Client.DisplacementMap;
-using Content.Client._Tech.Displacement; // Jamboree~ gnomes
+using Content.Client._Jamboree.Displacement; // Jamboree~ gnomes
 using Content.Shared.CCVar;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;

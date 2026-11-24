@@ -2,7 +2,7 @@ version = 1
 
 # Metadata provenance: https://github.com/Nao-Nauno/Jamboree-Station/blob/40e74dc4942c2c458b42be16dfe89f465a3000a5/Resources/Textures/_Tech/Interface/language_icon.rsi/meta.json
 [[annotations]]
-path = ["_Tech/Interface/language_icon.rsi/gnomish.png"]
+path = ["_Jamboree/Interface/language_icon.rsi/gnomish.png"]
 precedence = "closest"
 SPDX-FileCopyrightText = "Made by Bibble for Jamboree"
 SPDX-License-Identifier = "CC-BY-SA-3.0"
@@ -10,10 +10,10 @@ SPDX-License-Identifier = "CC-BY-SA-3.0"
 # Metadata provenance: https://github.com/Nao-Nauno/Jamboree-Station/blob/40e74dc4942c2c458b42be16dfe89f465a3000a5/Resources/Textures/_Tech/Mobs/Species/Gnome/displacement.rsi/meta.json
 [[annotations]]
 path = [
-    "_Tech/Mobs/Species/Gnome/displacement.rsi/dwarfism.png",
-    "_Tech/Mobs/Species/Gnome/displacement.rsi/dwarfism_hand_left.png",
-    "_Tech/Mobs/Species/Gnome/displacement.rsi/dwarfism_hand_right.png",
-    "_Tech/Mobs/Species/Gnome/displacement.rsi/dwarfism_vertical.png",
+    "_Jamboree/Mobs/Species/Gnome/displacement.rsi/dwarfism.png",
+    "_Jamboree/Mobs/Species/Gnome/displacement.rsi/dwarfism_hand_left.png",
+    "_Jamboree/Mobs/Species/Gnome/displacement.rsi/dwarfism_hand_right.png",
+    "_Jamboree/Mobs/Species/Gnome/displacement.rsi/dwarfism_vertical.png",
 ]
 precedence = "closest"
 SPDX-FileCopyrightText = "dwarfism sprites made by SlamBamActionman (Github), taken from space-wizards/space-station-14 at 24485c39eeb41a30e6d7c8ec2a0fe69dfc20e021"
@@ -22,8 +22,8 @@ SPDX-License-Identifier = "CC-BY-SA-3.0"
 # Metadata provenance: https://github.com/Nao-Nauno/Jamboree-Station/blob/40e74dc4942c2c458b42be16dfe89f465a3000a5/Resources/Textures/_Tech/Mobs/Species/Gnome/parts.rsi/meta.json
 [[annotations]]
 path = [
-    "_Tech/Mobs/Species/Gnome/parts.rsi/eyes.png",
-    "_Tech/Mobs/Species/Gnome/parts.rsi/head.png",
+    "_Jamboree/Mobs/Species/Gnome/parts.rsi/eyes.png",
+    "_Jamboree/Mobs/Species/Gnome/parts.rsi/head.png",
 ]
 precedence = "closest"
 SPDX-FileCopyrightText = "Made by Bibble for Jamboree"
