@@ -9,7 +9,7 @@
 - type: entity
   parent: BaseMobSpeciesOrganic
   id: MobBaseGnome
-  name: Urist McHands The Gnome
+  name: Urist McGnome
   save: false
   abstract: true
   components:
