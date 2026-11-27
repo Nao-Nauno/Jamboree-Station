@@ -90,87 +90,77 @@
     displacement:
       sizeMaps:
         32:
-          sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-          state: dwarfism
-  - type: Hands
-    leftHandDisplacement:
-      sizeMaps:
-        32:
-          sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-          state: dwarfism_hand_left
-    rightHandDisplacement:
-      sizeMaps:
-        32:
-          sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-          state: dwarfism_hand_right
+          sprite: _Jamboree/Mobs/Species/Gnome/body_displacement.rsi
+          state: shift_down
   - type: Inventory
     femaleDisplacements: { }
+    # Here we are using the Impstation goblin clothing maps (by mqole)
     displacements:
       jumpsuit:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: jumpsuit
       outerClothing:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: outerClothing
       suitstorage:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: suitstorage
       id:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: jumpsuit
       mask:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: mask
       belt:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: belt
       eyes:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: glasses
       gloves:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: hands
       head:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: head
       neck:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: neck
       back:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: back
       ears:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: ears
       shoes:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: feet
 
 - type: entity
   parent: BaseSpeciesDummy
@@ -182,73 +172,74 @@
     displacement:
       sizeMaps:
         32:
-          sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-          state: dwarfism
+          sprite: _Jamboree/Mobs/Species/Gnome/body_displacement.rsi
+          state: shift_down
   - type: Inventory
     femaleDisplacements: { }
+    # Here we are using the Impstation goblin clothing maps (by mqole)
     displacements:
       jumpsuit:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: jumpsuit
       outerClothing:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: outerClothing
       suitstorage:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: suitstorage
       id:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: jumpsuit
       mask:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: mask
       belt:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: belt
       eyes:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: glasses
       gloves:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: hands
       head:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: head
       neck:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: neck
       back:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: back
       ears:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: ears
       shoes:
         sizeMaps:
           32:
-            sprite: _Jamboree/Mobs/Species/Gnome/displacement.rsi
-            state: dwarfism
+            sprite: _Impstation/Mobs/Species/Goblin/displacement.rsi
+            state: feet

@@ -31,7 +31,7 @@
   defaultWidth: 1
   maxWidth: 1.15
 
-# Human body with Bibble's gnome head and eyes
+# Here we are using the Impstation goblin body (slightly recoloured) with Bibble's gnome head and eyes!
 - type: speciesBaseSprites
   id: MobGnomeSprites
   sprites:
@@ -45,18 +45,17 @@
     Snout: MobHumanoidAnyMarking
     UndergarmentTop: MobHumanoidAnyMarking
     UndergarmentBottom: MobHumanoidAnyMarking
-    Chest: MobHumanChest
-    Groin: MobHumanGroin
+    Chest: MobGnomeTorso
     Eyes: MobGnomeEyes
     HeadTop: MobHumanoidAnyMarking
-    LArm: MobHumanLArm
-    RArm: MobHumanRArm
-    LHand: MobHumanLHand
-    RHand: MobHumanRHand
-    LLeg: MobHumanLLeg
-    RLeg: MobHumanRLeg
-    LFoot: MobHumanLFoot
-    RFoot: MobHumanRFoot
+    LArm: MobGnomeLArm
+    RArm: MobGnomeRArm
+    LHand: MobGnomeLHand
+    RHand: MobGnomeRHand
+    LLeg: MobGnomeLLeg
+    RLeg: MobGnomeRLeg
+    LFoot: MobGnomeLFoot
+    RFoot: MobGnomeRFoot
     Tail: MobHumanoidAnyMarking
     HeadSide: MobHumanoidAnyMarking
 
@@ -83,3 +82,69 @@
   baseSprite:
     sprite: _Jamboree/Mobs/Species/Gnome/parts.rsi
     state: eyes
+
+- type: humanoidBaseSprite
+  id: MobGnomeTorso
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: torso
+
+- type: humanoidBaseSprite
+  id: MobGnomeTorsoMale
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: torso
+
+- type: humanoidBaseSprite
+  id: MobGnomeTorsoFemale
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: torso
+
+- type: humanoidBaseSprite
+  id: MobGnomeLArm
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: l_arm
+
+- type: humanoidBaseSprite
+  id: MobGnomeRArm
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: r_arm
+
+- type: humanoidBaseSprite
+  id: MobGnomeLHand
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: l_hand
+
+- type: humanoidBaseSprite
+  id: MobGnomeRHand
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: r_hand
+
+- type: humanoidBaseSprite
+  id: MobGnomeLLeg
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: l_leg
+
+- type: humanoidBaseSprite
+  id: MobGnomeRLeg
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: r_leg
+
+- type: humanoidBaseSprite
+  id: MobGnomeLFoot
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: l_foot
+
+- type: humanoidBaseSprite
+  id: MobGnomeRFoot
+  baseSprite:
+    sprite: _Jamboree/Mobs/Species/Gnome/body.rsi
+    state: r_foot
